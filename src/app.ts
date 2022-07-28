@@ -6,30 +6,33 @@ import { accountsRouter } from './routes/accounts'
 import { transferRouter } from './routes/transfer'
 import { errorToStatusCode } from './middleware/error'
 import { authRouter } from './routes/auth'
-import { NotImplementedError } from './types'
 
 function getSessionName(): string {
   // must return a name for the session cookie, typically the provider name
-  throw new NotImplementedError('getSessionName not implemented')
+  return 'DUNIA PAYMENT'
 }
 
 export function initApp({
   clientAuthMiddleware,
   sessionSecret,
   chainId,
+  client,
 }: {
   clientAuthMiddleware: express.RequestHandler[]
   sessionSecret: string
-  chainId: number
+  chainId: number,
+  client: any
 }): express.Application {
   const app = express()
+
+
 
   app.use(express.json())
 
   app.get('/clock', (_req, _res) => {
     // NOTE: you *could* just use res.status(200).send({time: new Date().toISOFormat()}), BUT only if your server is single-node
     //  (otherwise you need session affinity or some way of guaranteeing consistency of the current time between nodes)
-    throw new NotImplementedError()
+    return _res.status(200).send({time: new Date().toUTCString()})
   })
 
   app.use(
@@ -43,7 +46,7 @@ export function initApp({
     }),
   )
 
-  app.use('/auth', authRouter({ chainId }))
+  app.use('/auth', authRouter({ chainId, client }))
 
   app.use('/quote', quoteRouter({ clientAuthMiddleware }))
   app.use('/kyc', kycRouter({ clientAuthMiddleware }))

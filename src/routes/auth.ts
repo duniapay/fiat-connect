@@ -1,5 +1,6 @@
 import express from 'express'
-import { ErrorTypes, SiweMessage } from 'siwe'
+import { ErrorTypes, SiweMessage } from 'siwe';
+
 import { validateSchema } from '../schema'
 import {
   AuthRequestBody,
@@ -12,17 +13,32 @@ import { asyncRoute } from './async-route'
 const MAX_EXPIRATION_TIME_MS = 4 * 60 * 60 * 1000 // 4 hours
 const VERSION = '1'
 
-function validateNonce(_nonce: string) {
+async function validateNonce(_nonce: string, _redisClient: any) {
   // must validate that the nonce hasn't already been used. Could typically be
   // done by saving nonces in a store with TTL (like redis) and check if the
   // nonce is already used. If a nonce is already used, must throw a NonceInUse
   // error. e.g. `throw new InvalidSiweParamsError(FiatConnectError.NonceInUser)`
-  throw new NotImplementedError('Nonce validation not implemented')
+  try { 
+    const nonceInUse = await _redisClient.get(_nonce);
+    if (nonceInUse) {
+      throw new InvalidSiweParamsError(FiatConnectError.NonceInUse)
+    }
+    await markNonceAsUsed(_nonce, new Date(), _redisClient);
+
+  } catch (error) {
+    throw new NotImplementedError(`validateNonce error ${error}`)
+  }
 }
 
-function markNonceAsUsed(_nonce: string, _expirationTime: Date) {
+async function markNonceAsUsed(_nonce: string, _expirationTime: Date, _redisClient: any) {
   // helper method for storing nonces, which can then be used by the above method.
-  throw new NotImplementedError('markNonceAsUsed not implemented')
+  try {
+    await _redisClient.set(_nonce, _expirationTime.toISOString(), {
+      EX: parseInt(_expirationTime.toUTCString()),
+    });
+  } catch (error) {
+    throw new NotImplementedError(`markNonceAsUsed error ${error}`)
+  }
 }
 
 function validateIssuedAtAndExpirationTime(
@@ -62,10 +78,10 @@ function validateIssuedAtAndExpirationTime(
 }
 
 function validateDomainAndUri(_domain: string, _uri: string) {
-  throw new NotImplementedError('Domain and URI validation not implemented')
+  return _domain === 'dunia.africa' && _uri === '/auth/login';
 }
 
-export function authRouter({ chainId }: { chainId: number }): express.Router {
+export function authRouter({ chainId, client }: { chainId: number,client: any }): express.Router {
   const router = express.Router()
 
   const authRequestBodyValidator = (
@@ -94,6 +110,7 @@ export function authRouter({ chainId }: { chainId: number }): express.Router {
           const siweMessage = new SiweMessage(req.body.message)
           siweFields = await siweMessage.validate(req.body.signature)
         } catch (err) {
+          // eslint-disable-next-line no-console
           console.warn(err)
           const errMessage = (err as Error).message
           if (errMessage.includes(ErrorTypes.INVALID_SIGNATURE)) {
@@ -109,12 +126,13 @@ export function authRouter({ chainId }: { chainId: number }): express.Router {
             'Invalid siwe message',
           )
         }
+        await client.connect();
 
         validateIssuedAtAndExpirationTime(
           siweFields.issuedAt,
           siweFields.expirationTime,
         )
-        validateNonce(siweFields.nonce)
+        await validateNonce(siweFields.nonce, client)
         validateDomainAndUri(siweFields.domain, siweFields.uri)
 
         if (siweFields.version !== VERSION) {
@@ -132,7 +150,7 @@ export function authRouter({ chainId }: { chainId: number }): express.Router {
         }
 
         const sessionExpirationTime = new Date(siweFields.expirationTime!)
-        markNonceAsUsed(siweFields.nonce, sessionExpirationTime)
+        await markNonceAsUsed(siweFields.nonce, sessionExpirationTime,client)
 
         req.session.siwe = siweFields
         req.session.cookie.expires = sessionExpirationTime

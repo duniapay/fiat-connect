@@ -1,4 +1,5 @@
-import { SiweMessage } from 'siwe'
+import { SiweMessage } from 'siwe';
+
 
 declare module 'express-session' {
   interface SessionData {
