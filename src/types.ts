@@ -45,6 +45,7 @@ export interface Config {
   authConfig: AuthenticationConfig
   port: number
   sessionSecret: string
+  redis: string
 }
 
 export enum ClientAuthStrategy {

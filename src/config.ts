@@ -51,11 +51,18 @@ export function loadConfig(): Config {
       type: 'string',
       demandOption: true,
     })
+    .option('redis', {
+      description: 'Redis server to connect',
+      example: process.env.REDIS_HOST,
+      type: 'string',
+      default: `redis://localhost:6379`,
+    })
     .parseSync()
 
   return {
     authConfig: authConfigOptions[argv['auth-config-option']],
     port: argv.port,
     sessionSecret: argv.sessionSecret,
+    redis: argv.redis
   }
 }

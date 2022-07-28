@@ -2,13 +2,14 @@ import { loadConfig } from './config'
 import { getClientAuthMiddleware } from './middleware/authenticate'
 import { initApp } from './app'
 import { createClient } from 'redis'
+import url from 'url';
 
 async function main() {
-  const { port, authConfig, sessionSecret } = loadConfig()
+  const { port, authConfig, sessionSecret, redis } = loadConfig()
 
   const clientAuthMiddleware = getClientAuthMiddleware(authConfig)
+  const client = createClient({url: redis});
 
-  const client = createClient()
   await client.connect()
 
   const app = initApp({
