@@ -1,5 +1,5 @@
 import express from 'express'
-import { ErrorTypes, SiweMessage } from 'siwe';
+import { ErrorTypes, SiweMessage } from 'siwe'
 
 import { validateSchema } from '../schema'
 import {
@@ -18,24 +18,27 @@ async function validateNonce(_nonce: string, _redisClient: any) {
   // done by saving nonces in a store with TTL (like redis) and check if the
   // nonce is already used. If a nonce is already used, must throw a NonceInUse
   // error. e.g. `throw new InvalidSiweParamsError(FiatConnectError.NonceInUser)`
-  try { 
-    const nonceInUse = await _redisClient.get(_nonce);
+  try {
+    const nonceInUse = await _redisClient.get(_nonce)
     if (nonceInUse) {
       throw new InvalidSiweParamsError(FiatConnectError.NonceInUse)
     }
-    await markNonceAsUsed(_nonce, new Date(), _redisClient);
-
+    await markNonceAsUsed(_nonce, new Date(), _redisClient)
   } catch (error) {
     throw new NotImplementedError(`validateNonce error ${error}`)
   }
 }
 
-async function markNonceAsUsed(_nonce: string, _expirationTime: Date, _redisClient: any) {
+async function markNonceAsUsed(
+  _nonce: string,
+  _expirationTime: Date,
+  _redisClient: any,
+) {
   // helper method for storing nonces, which can then be used by the above method.
   try {
     await _redisClient.set(_nonce, _expirationTime.toISOString(), {
       EX: parseInt(_expirationTime.toUTCString()),
-    });
+    })
   } catch (error) {
     throw new NotImplementedError(`markNonceAsUsed error ${error}`)
   }
@@ -78,10 +81,16 @@ function validateIssuedAtAndExpirationTime(
 }
 
 function validateDomainAndUri(_domain: string, _uri: string) {
-  return _domain === 'dunia.africa' && _uri === '/auth/login';
+  return _domain === 'dunia.africa' && _uri === '/auth/login'
 }
 
-export function authRouter({ chainId, client }: { chainId: number,client: any }): express.Router {
+export function authRouter({
+  chainId,
+  client,
+}: {
+  chainId: number
+  client: any
+}): express.Router {
   const router = express.Router()
 
   const authRequestBodyValidator = (
@@ -126,7 +135,7 @@ export function authRouter({ chainId, client }: { chainId: number,client: any })
             'Invalid siwe message',
           )
         }
-        await client.connect();
+        await client.connect()
 
         validateIssuedAtAndExpirationTime(
           siweFields.issuedAt,
@@ -150,7 +159,7 @@ export function authRouter({ chainId, client }: { chainId: number,client: any })
         }
 
         const sessionExpirationTime = new Date(siweFields.expirationTime!)
-        await markNonceAsUsed(siweFields.nonce, sessionExpirationTime,client)
+        await markNonceAsUsed(siweFields.nonce, sessionExpirationTime, client)
 
         req.session.siwe = siweFields
         req.session.cookie.expires = sessionExpirationTime
