@@ -55,7 +55,7 @@ export function loadConfig(): Config {
       description: 'Redis server to connect',
       example: process.env.REDIS_HOST,
       type: 'string',
-      default: `redis://localhost:6379`,
+      default: process.env.REDIS_HOST || `redis://localhost:6379`,
     })
     .parseSync()
 
@@ -63,6 +63,6 @@ export function loadConfig(): Config {
     authConfig: authConfigOptions[argv['auth-config-option']],
     port: argv.port,
     sessionSecret: argv.sessionSecret,
-    redis: argv.redis
+    redis: argv.redis,
   }
 }
