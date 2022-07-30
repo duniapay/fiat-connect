@@ -7,7 +7,7 @@ async function main() {
   const { port, authConfig, sessionSecret, redis } = loadConfig()
 
   const clientAuthMiddleware = getClientAuthMiddleware(authConfig)
-  console.log(redis);
+  console.log(redis)
   const client = createClient({ url: redis })
 
   await client.connect()
