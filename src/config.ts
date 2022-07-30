@@ -55,7 +55,7 @@ export function loadConfig(): Config {
       description: 'Redis server to connect',
       example: process.env.REDIS_HOST,
       type: 'string',
-      default: process.env.REDIS_HOST || `redis://localhost:6379`,
+      default: `redis://${process.env.REDIS_HOST}` || `redis://localhost:6379`,
     })
     .parseSync()
 
