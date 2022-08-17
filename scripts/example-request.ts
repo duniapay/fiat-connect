@@ -28,24 +28,25 @@ async function main() {
     uri: `https://${DOMAIN}`,
     version: '1',
     chainId: 42220,
-    nonce: '1294888888590678',
+    nonce: '12948888885490678',
     expirationTime: expirationDate.toISOString(),
   })
   const message = siweMessage.prepareMessage()
   const signature = await wallet.signMessage(message)
 
+  console.log('message', message)
+  console.log('signature', signature)
 
+  // const authResponse = await fetch('http://localhost:8080/auth/login', {
+  //   method: 'POST',
+  //   body: JSON.stringify({ message, signature }),
+  //   headers: { 'Content-Type': 'application/json' },
+  // })
 
-  const authResponse = await fetch('http://localhost:8080/auth/login', {
-    method: 'POST',
-    body: JSON.stringify({ message, signature }),
-    headers: { 'Content-Type': 'application/json' },
-  })
-
-  if (!authResponse.ok) {
-    console.log('Auth request failed:', await authResponse.text())
-    return
-  }
+  // if (!authResponse.ok) {
+  //   console.log('Auth request failed:', await authResponse.text())
+  //   return
+  // }
 
 
   // set-cookie will be of the form:
