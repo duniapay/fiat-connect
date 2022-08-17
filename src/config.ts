@@ -6,10 +6,12 @@ import {
 } from './types'
 import * as dotenv from 'dotenv'
 import yargs from 'yargs'
+import path from 'path'
 
 const DEFAULT_PORT = 8080
 export const ALFAJORES_FORNO_URL = 'https://alfajores-forno.celo-testnet.org'
 export const MAINNET_FORNO_URL = 'https://forno.celo.org'
+const OPENAPI_SPEC = `../specification/swagger.yaml`
 
 export const authConfigOptions: Record<string, AuthenticationConfig> = {
   alfajores: {
@@ -30,6 +32,11 @@ export function loadConfig(): Config {
   // Note that this is just one possible way of dealing with configuration/environment variables.
   // Feel free to adapt this to your needs!
   dotenv.config()
+  // Redis Client From Configuration
+  const redisClient: string =
+    process.env.NODE_ENV === 'production'
+      ? `redis://${process.env.REDIS_HOST}`
+      : `redis://localhost:6379`
 
   const argv = yargs
     .env('')
@@ -45,6 +52,12 @@ export function loadConfig(): Config {
       example: DEFAULT_PORT,
       type: 'number',
       default: DEFAULT_PORT,
+    })
+    .option('openapi-spec', {
+      description: 'OpenAPI 2.0 specification file to test against',
+      type: 'string',
+      example: OPENAPI_SPEC,
+      default: OPENAPI_SPEC,
     })
     .option('session-secret', {
       description: 'The secret for signing the session',
@@ -63,6 +76,7 @@ export function loadConfig(): Config {
     authConfig: authConfigOptions[argv['auth-config-option']],
     port: argv.port,
     sessionSecret: argv.sessionSecret,
-    redis: argv.redis,
+    redisClientHostUrl: redisClient,
+    openapiSpec: argv.openapiSpec,
   }
 }

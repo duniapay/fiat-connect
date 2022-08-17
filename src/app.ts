@@ -6,6 +6,7 @@ import { accountsRouter } from './routes/accounts'
 import { transferRouter } from './routes/transfer'
 import { errorToStatusCode } from './middleware/error'
 import { authRouter } from './routes/auth'
+import { AppDataSource } from './utils/data-source'
 
 function getSessionName(): string {
   // must return a name for the session cookie, typically the provider name
@@ -24,13 +25,13 @@ export function initApp({
   client: any
 }): express.Application {
   const app = express()
-
+  const dataSource = AppDataSource
   app.use(express.json())
 
   app.get('/clock', (_req, _res) => {
     // NOTE: you *could* just use res.status(200).send({time: new Date().toISOFormat()}), BUT only if your server is single-node
     //  (otherwise you need session affinity or some way of guaranteeing consistency of the current time between nodes)
-    return _res.status(200).send({ time: new Date().toUTCString() })
+    return _res.status(200).send({ time: new Date().toISOString() })
   })
 
   app.use(
@@ -46,12 +47,11 @@ export function initApp({
 
   app.use('/auth', authRouter({ chainId, client }))
 
-  app.use('/quote', quoteRouter({ clientAuthMiddleware }))
-  app.use('/kyc', kycRouter({ clientAuthMiddleware }))
-  app.use('/accounts', accountsRouter({ clientAuthMiddleware }))
-  app.use('/transfer', transferRouter({ clientAuthMiddleware }))
+  app.use('/quote', quoteRouter({ clientAuthMiddleware, client, dataSource }))
+  app.use('/kyc', kycRouter({ clientAuthMiddleware, dataSource }))
+  app.use('/accounts', accountsRouter({ clientAuthMiddleware, dataSource }))
+  app.use('/transfer', transferRouter({ clientAuthMiddleware, dataSource }))
 
   app.use(errorToStatusCode)
-
   return app
 }

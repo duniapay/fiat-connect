@@ -45,7 +45,8 @@ export interface Config {
   authConfig: AuthenticationConfig
   port: number
   sessionSecret: string
-  redis: string
+  openapiSpec: string
+  redisClientHostUrl: string
 }
 
 export enum ClientAuthStrategy {

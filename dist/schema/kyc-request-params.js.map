@@ -1,0 +1,1 @@
+{"version":3,"file":"kyc-request-params.js","sourceRoot":"","sources":["../../src/schema/kyc-request-params.ts"],"names":[],"mappings":";;;AACA,oCAAsD;AAEzC,QAAA,sBAAsB,GAAqC;IACtE,GAAG,EAAE,wBAAwB;IAC7B,IAAI,EAAE,QAAQ;IACd,UAAU,EAAE;QACV,SAAS,EAAE;YACT,IAAI,EAAE,QAAQ;YACd,IAAI,EAAE,MAAM,CAAC,MAAM,CAAC,iBAAS,CAAC;SAC/B;KACF;IACD,QAAQ,EAAE,CAAC,WAAW,CAAC;CACxB,CAAA"}

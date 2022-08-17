@@ -9,11 +9,20 @@ import {
   SupportedFiatAccountSchemas,
 } from '../types'
 import { siweAuthMiddleware } from '../middleware/authenticate'
+import { Account } from '../entity/account.entity'
+import {
+  AccountNumber,
+  DuniaWallet,
+  FiatConnectError,
+  MobileMoney,
+} from '@fiatconnect/fiatconnect-types'
 
 export function accountsRouter({
   clientAuthMiddleware,
+  dataSource,
 }: {
   clientAuthMiddleware: express.RequestHandler[]
+  dataSource: any
 }): express.Router {
   const router = express.Router()
 
@@ -59,16 +68,42 @@ export function accountsRouter({
         >,
         _res: express.Response,
       ) => {
+        let userAddress = ''
+        if (
+          req.session.siwe?.address !== undefined &&
+          req.session.siwe.address !== null
+        ) {
+          userAddress = req.session.siwe?.address
+        }
+
         // Validate data in body for exact fiat account schema type. The body middleware
         // doesn't ensure exact match of fiatAccountSchema and data
-        validateSchema<FiatAccountSchemas[typeof req.body.fiatAccountSchema]>(
-          req.body.data,
-          `${req.body.fiatAccountSchema}Schema`,
-        )
+        const validatedData = validateSchema<
+          FiatAccountSchemas[typeof req.body.fiatAccountSchema]
+        >(req.body.data, `${req.body.fiatAccountSchema}Schema`)
+        const entity = new Account()
+        entity.institutionName = validatedData.institutionName
+        entity.accountName = validatedData?.accountName
+        entity.owner = userAddress
+        /// TODO: Generate entity based on validatedData type
 
-        throw new NotImplementedError(
-          'POST /accounts/:fiatAccountSchema not implemented',
-        )
+        try {
+          // Load Repository
+          const repository = dataSource.getRepository(Account)
+          await repository.save(entity)
+
+          return _res.send({
+            fiatAccountId: entity.id,
+            accountName: entity.accountName,
+            institutionName: entity.institutionName,
+            fiatAccountType: entity.fiatAccountType,
+            fiatAccountSchema: `${req.body.fiatAccountSchema}Schema`,
+          })
+        } catch (error) {
+          return _res
+            .status(409)
+            .send({ error: FiatConnectError.ResourceExists })
+        }
       },
     ),
   )
@@ -76,7 +111,19 @@ export function accountsRouter({
   router.get(
     '/',
     asyncRoute(async (_req: express.Request, _res: express.Response) => {
-      throw new NotImplementedError('GET /accounts not implemented')
+      try {
+        const userAddress = _req.session.siwe?.address
+        // Load Repository
+        const repository = dataSource.getRepository(Account)
+        const transfer = await repository.findBy({
+          owner: userAddress,
+        })
+        return _res.send(transfer)
+      } catch (error) {
+        return _res
+          .status(404)
+          .send({ error: FiatConnectError.ResourceNotFound })
+      }
     }),
   )
 
@@ -88,9 +135,23 @@ export function accountsRouter({
         _req: express.Request<DeleteFiatAccountRequestParams>,
         _res: express.Response,
       ) => {
-        throw new NotImplementedError(
-          'DELETE /accounts/:fiatAccountId not implemented',
-        )
+        const userAddress = _req.session.siwe?.address
+
+        try {
+          // Load Repository
+          const repository = dataSource.getRepository(Account)
+
+          const toRemove = await repository.findOneBy({
+            id: _req.body.fiatAccountId,
+            owner: userAddress,
+          })
+
+          await repository.remove(toRemove)
+        } catch (error) {
+          return _res
+            .status(404)
+            .send({ error: FiatConnectError.ResourceNotFound })
+        }
       },
     ),
   )
