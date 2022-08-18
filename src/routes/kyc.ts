@@ -1,18 +1,21 @@
 import express from 'express'
 import { asyncRoute } from './async-route'
 import { validateSchema } from '../schema/'
-import {
-  KycRequestParams,
-  KycSchemas,
-  NotImplementedError,
-  SupportedKycSchemas,
-} from '../types'
+import { KycRequestParams, KycSchemas, SupportedKycSchemas } from '../types'
 import { siweAuthMiddleware } from '../middleware/authenticate'
+import { KYC } from '../entity/kyc.entity'
+import {
+  FiatConnectError,
+  KycSchema,
+  KycStatus,
+} from '@fiatconnect/fiatconnect-types'
 
 export function kycRouter({
   clientAuthMiddleware,
+  dataSource,
 }: {
   clientAuthMiddleware: express.RequestHandler[]
+  dataSource: any
 }): express.Router {
   const router = express.Router()
 
@@ -44,12 +47,34 @@ export function kycRouter({
         _res: express.Response,
       ) => {
         // Delegate to type-specific handlers after validation provides type guards
-        validateSchema<KycSchemas[typeof req.params.kycSchema]>(
-          req.body,
-          `${req.params.kycSchema}KycSchema`,
-        )
+        const formattedSchema = validateSchema<
+          KycSchemas[typeof req.params.kycSchema]
+        >(req.body, `${req.params.kycSchema}KycSchema`)
+        /// TODO: Handle Geo
+        try {
+          // Load Repository
+          const repository = dataSource.getRepository(KYC)
+          const entity = new KYC()
 
-        throw new NotImplementedError('POST /kyc/:kycSchema not implemented')
+          entity.address = formattedSchema?.address
+          entity.dateOfBirth = formattedSchema?.dateOfBirth
+          entity.firstName = formattedSchema?.firstName
+          entity.lastName = formattedSchema?.lastName
+          entity.middleName = formattedSchema?.middleName
+          entity.phoneNumber = formattedSchema?.phoneNumber
+          entity.selfieDocument = formattedSchema?.selfieDocument
+          entity.identificationDocument =
+            formattedSchema?.identificationDocument
+          entity.kycSchemaName = KycSchema.PersonalDataAndDocuments
+          entity.status = KycStatus.KycPending
+
+          await repository.save(entity)
+          return _res.send({ kycStatus: KycStatus.KycPending })
+        } catch (error) {
+          return _res
+            .status(409)
+            .send({ error: FiatConnectError.ResourceExists })
+        }
       },
     ),
   )
@@ -62,9 +87,25 @@ export function kycRouter({
         _req: express.Request<KycRequestParams>,
         _res: express.Response,
       ) => {
-        throw new NotImplementedError(
-          'GET /kyc/:kycSchema/status not implemented',
-        )
+        try {
+          const formattedSchema = validateSchema<
+            KycSchemas[typeof _req.params.kycSchema]
+          >(_req.body, `${_req.params.kycSchema}KycSchema`)
+          // Load Repository
+          const repository = dataSource.getRepository(KYC)
+
+          const result = await repository.findOneBy({
+            firstName: formattedSchema.firstName,
+            lastName: formattedSchema.lastName,
+            dateOfBirth: formattedSchema.dateOfBirth,
+          })
+
+          return _res.send({ status: result?.status })
+        } catch (error) {
+          return _res
+            .status(404)
+            .send({ error: FiatConnectError.ResourceNotFound })
+        }
       },
     ),
   )
@@ -77,7 +118,25 @@ export function kycRouter({
         _req: express.Request<KycRequestParams>,
         _res: express.Response,
       ) => {
-        throw new NotImplementedError('DELETE /kyc/:kycSchema not implemented')
+        const formattedSchema = validateSchema<
+          KycSchemas[typeof _req.params.kycSchema]
+        >(_req.body, `${_req.params.kycSchema}KycSchema`)
+        try {
+          // Load Repository
+          const repository = dataSource.getRepository(KYC)
+
+          const toRemove = await repository.findOneBy({
+            firstName: formattedSchema.firstName,
+            lastName: formattedSchema.lastName,
+            dateOfBirth: formattedSchema.dateOfBirth,
+          })
+
+          await repository.remove(toRemove)
+        } catch (error) {
+          return _res
+            .status(404)
+            .send({ error: FiatConnectError.ResourceNotFound })
+        }
       },
     ),
   )

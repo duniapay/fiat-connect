@@ -1,10 +1,22 @@
 import express from 'express'
+import * as dotenv from 'dotenv'
+
 import {
   AuthenticationConfig,
   ClientAuthStrategy,
   FiatConnectError,
   UnauthorizedError,
 } from '../types'
+
+
+
+
+
+dotenv.config()
+
+/// TODO: get api key from configuration
+const EXPECTED_API_KEY = process.env.API_KEY
+export const COINMARKETCAP_KEY = process.env.COINMARKETCAP_KEY
 
 function doNothingMiddleware(
   _req: express.Request,
@@ -19,8 +31,10 @@ function verifyClientKeyMiddleware(
   _res: express.Response,
   _next: express.NextFunction,
 ) {
-  // could be something like `if (req.headers.authorization !== `Bearer ${EXPECTED_API_KEY}`) throw new UnauthorizedError(); next();
-  throw new Error('verifyClientKeyMiddleware not implemented')
+  // could be something like `
+  if (_req.headers.authorization !== `Bearer ${EXPECTED_API_KEY}`)
+    throw new UnauthorizedError()
+  _next()
 }
 
 export function getClientAuthMiddleware(

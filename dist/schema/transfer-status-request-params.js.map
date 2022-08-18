@@ -1,0 +1,1 @@
+{"version":3,"file":"transfer-status-request-params.js","sourceRoot":"","sources":["../../src/schema/transfer-status-request-params.ts"],"names":[],"mappings":";;;AAGa,QAAA,iCAAiC,GAC5C;IACE,GAAG,EAAE,mCAAmC;IACxC,IAAI,EAAE,QAAQ;IACd,UAAU,EAAE;QACV,UAAU,EAAE;YACV,IAAI,EAAE,QAAQ;SACf;KACF;IACD,QAAQ,EAAE,CAAC,YAAY,CAAC;CACzB,CAAA"}
