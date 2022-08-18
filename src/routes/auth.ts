@@ -20,12 +20,12 @@ async function validateNonce(_nonce: string, _redisClient: any) {
   // error. e.g. `throw new InvalidSiweParamsError(FiatConnectError.NonceInUser)`
   try {
     const nonceInUse = await _redisClient.get(_nonce)
+    // eslint-disable-next-line no-console
     if (nonceInUse) {
       throw new InvalidSiweParamsError(FiatConnectError.NonceInUse)
     }
-    await markNonceAsUsed(_nonce, new Date(), _redisClient)
   } catch (error) {
-    throw new NotImplementedError(`validateNonce error ${error}`)
+    throw new InvalidSiweParamsError(FiatConnectError.InvalidParameters)
   }
 }
 
@@ -37,10 +37,11 @@ async function markNonceAsUsed(
   // helper method for storing nonces, which can then be used by the above method.
   try {
     await _redisClient.set(_nonce, _expirationTime.toISOString(), {
-      EX: parseInt(_expirationTime.toUTCString()),
+      EX: parseInt(_expirationTime.toISOString()),
+      NX: true,
     })
   } catch (error) {
-    throw new NotImplementedError(`markNonceAsUsed error ${error}`)
+    throw new InvalidSiweParamsError(FiatConnectError.NonceInUse)
   }
 }
 
@@ -81,7 +82,14 @@ function validateIssuedAtAndExpirationTime(
 }
 
 function validateDomainAndUri(_domain: string, _uri: string) {
-  return _domain === 'dunia.africa' && _uri === '/auth/login'
+  const isDomainValid =
+    _domain === 'dunia.africa' && _uri === 'https://dunia.africa'
+  if (!isDomainValid) {
+    throw new InvalidSiweParamsError(
+      FiatConnectError.InvalidParameters,
+      'Invalid domain or uri',
+    )
+  } else return true
 }
 
 export function authRouter({
@@ -135,7 +143,6 @@ export function authRouter({
             'Invalid siwe message',
           )
         }
-        await client.connect()
 
         validateIssuedAtAndExpirationTime(
           siweFields.issuedAt,

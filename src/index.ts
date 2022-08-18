@@ -1,16 +1,17 @@
 import { loadConfig } from './config'
 import { getClientAuthMiddleware } from './middleware/authenticate'
 import { initApp } from './app'
-import { createClient } from 'redis'
+import { AppDataSource } from './utils/data-source'
+import { redisClient, connectRedis } from './utils/connectRedis'
 
 async function main() {
-  const { port, authConfig, sessionSecret, redis } = loadConfig()
+  const { port, authConfig, sessionSecret, redisClientHostUrl } = loadConfig()
 
   const clientAuthMiddleware = getClientAuthMiddleware(authConfig)
-  console.log(redis);
-  const client = createClient({ url: redis })
 
-  await client.connect()
+  const client = redisClient
+
+  await connectRedis()
 
   const app = initApp({
     clientAuthMiddleware,
@@ -19,21 +20,25 @@ async function main() {
     client,
   })
 
-  app.listen(port, () => {
-    // eslint-disable-next-line no-console
-    console.log(`Listening on http://localhost:${port}`)
-    client.on('connect', function () {
-      console.log('Connected to redis successfully')
+  AppDataSource.initialize()
+    .then(async () => {
+      // start express server
+      app.listen(port, () => {
+        // eslint-disable-next-line no-console
+        console.log(`Listening on http://localhost:${port}`)
+      })
+      // eslint-disable-next-line no-console
     })
-
-    client.on('error', function (err) {
-      console.log('Could not establish a connection with redis. ' + err)
-    })
-  })
+    .catch((error) => console.log(error))
 }
 
-main().catch((err) => {
-  // eslint-disable-next-line no-console
-  console.log(err)
-  process.exit(1)
-})
+main()
+  .then(() => {
+    // eslint-disable-next-line no-console
+    console.log('Server Started !')
+  })
+  .catch((err) => {
+    // eslint-disable-next-line no-console
+    console.log(err)
+    process.exit(1)
+  })

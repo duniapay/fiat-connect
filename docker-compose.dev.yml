@@ -1,0 +1,27 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:latest
+    container_name: database
+    restart: always
+    ports:
+      - '5432:5432'
+    volumes:
+      - progresDB:/var/lib/postgresql/data
+    env_file:
+      - ./.env.local
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: always
+    ports:
+      - '9000:6379'
+    volumes:
+      - redisDB:/data
+      
+volumes:
+  progresDB:
+  redisDB:
+
+

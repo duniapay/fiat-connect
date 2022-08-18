@@ -5,5 +5,6 @@ module.exports = {
   },
   rules: {
     'no-console': ['error', { allow: ['none'] }]
-  }
+  },
+  ignorePatterns: ['scripts/*.ts']
 }

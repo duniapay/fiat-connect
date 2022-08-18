@@ -1,0 +1,1 @@
+{"version":3,"file":"auth-request-body.js","sourceRoot":"","sources":["../../src/schema/auth-request-body.ts"],"names":[],"mappings":";;;AAGa,QAAA,qBAAqB,GAAoC;IACpE,GAAG,EAAE,uBAAuB;IAC5B,IAAI,EAAE,QAAQ;IACd,UAAU,EAAE;QACV,OAAO,EAAE;YACP,IAAI,EAAE,QAAQ;SACf;QACD,SAAS,EAAE;YACT,IAAI,EAAE,QAAQ;SACf;KACF;IACD,QAAQ,EAAE,CAAC,SAAS,EAAE,WAAW,CAAC;CACnC,CAAA"}

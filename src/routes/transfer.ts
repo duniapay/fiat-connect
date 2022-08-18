@@ -7,11 +7,14 @@ import {
   NotImplementedError,
 } from '../types'
 import { siweAuthMiddleware } from '../middleware/authenticate'
+import { Transfer } from '../entity/transfer.entity'
 
 export function transferRouter({
   clientAuthMiddleware,
+  dataSource,
 }: {
   clientAuthMiddleware: express.RequestHandler[]
+  dataSource: any
 }): express.Router {
   const router = express.Router()
 
@@ -50,7 +53,17 @@ export function transferRouter({
         _req: express.Request<{}, {}, TransferRequestBody>,
         _res: express.Response,
       ) => {
-        throw new NotImplementedError('POST /transfer/in not implemented')
+        try {
+          const transferOut = await dataSource
+            .getRepository(Transfer)
+            .create(_req.body)
+          const results = await dataSource
+            .getRepository(Transfer)
+            .save(transferOut)
+          return _res.send(results)
+        } catch (error) {
+          throw new NotImplementedError('POST /transfer/in failure')
+        }
       },
     ),
   )
@@ -63,7 +76,17 @@ export function transferRouter({
         _req: express.Request<{}, {}, TransferRequestBody>,
         _res: express.Response,
       ) => {
-        throw new NotImplementedError('POST /transfer/out not implemented')
+        try {
+          const transferOut = await dataSource
+            .getRepository(Transfer)
+            .create(_req.body)
+          const results = await dataSource
+            .getRepository(Transfer)
+            .save(transferOut)
+          return _res.send(results)
+        } catch (error) {
+          throw new NotImplementedError('POST /transfer/out failure')
+        }
       },
     ),
   )
@@ -76,9 +99,16 @@ export function transferRouter({
         _req: express.Request<TransferStatusRequestParams>,
         _res: express.Response,
       ) => {
-        throw new NotImplementedError(
-          'GET /transfer/:transferId/status not implemented',
-        )
+        try {
+          const transfer = await dataSource.getRepository(Transfer).findOneBy({
+            id: _req.params.transferId,
+          })
+          return _res.send(transfer)
+        } catch (error) {
+          throw new NotImplementedError(
+            'GET /transfer/:transferId/status failure',
+          )
+        }
       },
     ),
   )
