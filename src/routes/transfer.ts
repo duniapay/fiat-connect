@@ -8,6 +8,7 @@ import {
 } from '../types'
 import { siweAuthMiddleware } from '../middleware/authenticate'
 import { Transfer } from '../entity/transfer.entity'
+import { FiatConnectError, TransferStatus, TransferType } from '@fiatconnect/fiatconnect-types'
 
 export function transferRouter({
   clientAuthMiddleware,
@@ -17,6 +18,9 @@ export function transferRouter({
   dataSource: any
 }): express.Router {
   const router = express.Router()
+    // Load Repository
+    const repository = dataSource.getRepository(Transfer)
+    const entity = new Transfer()
 
   router.use(siweAuthMiddleware)
   router.use(clientAuthMiddleware)
@@ -50,20 +54,30 @@ export function transferRouter({
     transferRequestBodyValidator,
     asyncRoute(
       async (
-        _req: express.Request<{}, {}, TransferRequestBody>,
-        _res: express.Response,
+        req: express.Request<{}, {}, TransferRequestBody>,
+        res: express.Response,
       ) => {
         try {
-          const transferOut = await dataSource
-            .getRepository(Transfer)
-            .create(_req.body)
-          const results = await dataSource
-            .getRepository(Transfer)
-            .save(transferOut)
-          return _res.send(results)
+          entity.quoteId = req.body.quoteId
+          entity.fiatAccountId = req.body.fiatAccountId
+          entity.status = TransferStatus.TransferStarted
+          entity.transferAddress = '0x' + Math.random().toString(36).substr(2, 10)
+          entity.transferType = TransferType.TransferIn
+
+          const results = await repository
+            .save(entity)
+          return res.send({   
+            transferId: entity.id,
+            transferStatus: entity.status,
+            // Address from which the transfer will be sent 
+            transferAddress: entity.transferAddress,
+          })
         } catch (error) {
-          throw new NotImplementedError('POST /transfer/in failure')
-        }
+          console.log(error)
+
+          return res
+          .status(409)
+          .send({ error: FiatConnectError.ResourceExists })        }
       },
     ),
   )
@@ -73,20 +87,33 @@ export function transferRouter({
     transferRequestBodyValidator,
     asyncRoute(
       async (
-        _req: express.Request<{}, {}, TransferRequestBody>,
-        _res: express.Response,
+        req: express.Request<{}, {}, TransferRequestBody>,
+        res: express.Response,
       ) => {
         try {
-          const transferOut = await dataSource
-            .getRepository(Transfer)
-            .create(_req.body)
-          const results = await dataSource
-            .getRepository(Transfer)
-            .save(transferOut)
-          return _res.send(results)
+          entity.quoteId = req.body.quoteId
+          entity.fiatAccountId = req.body.fiatAccountId
+          entity.status = TransferStatus.TransferStarted
+          entity.transferAddress = '0x' + Math.random().toString(36).substr(2, 10)
+          entity.transferType = TransferType.TransferOut
+
+          const results =  await repository
+            .save(entity)
+
+
+            return res.send({   
+              transferId: results.id,
+              transferStatus: entity.status,
+              
+              // Address that the user must send funds to
+              transferAddress: entity.transferAddress,
+            })
         } catch (error) {
-          throw new NotImplementedError('POST /transfer/out failure')
-        }
+          console.log(error)
+
+          return res
+          .status(409)
+          .send({ error: FiatConnectError.ResourceExists })        }
       },
     ),
   )
@@ -96,18 +123,32 @@ export function transferRouter({
     transferStatusRequestParamsValidator,
     asyncRoute(
       async (
-        _req: express.Request<TransferStatusRequestParams>,
-        _res: express.Response,
+        req: express.Request<TransferStatusRequestParams>,
+        res: express.Response,
       ) => {
         try {
-          const transfer = await dataSource.getRepository(Transfer).findOneBy({
-            id: _req.params.transferId,
+          const transfer = await repository.findOneBy({
+            id: req.params.transferId,
           })
-          return _res.send(transfer)
-        } catch (error) {
-          throw new NotImplementedError(
-            'GET /transfer/:transferId/status failure',
+          return res.send(
+            {
+              status: transfer.status,
+              transferType: transfer.transferType,              
+              fiatType: `FiatTypeEnum`,
+              cryptoType: `CryptoTypeEnum`,
+              amountProvided: `string`,
+              amountReceived: `string`,
+              fee: `string`,
+              fiatAccountId: transfer.fiatAccountId,
+              transferId: transfer.id,
+              transferAddress: transfer.transferAddress,
+            }
           )
+        } catch (error) {
+          console.log(error)
+          return res
+          .status(404)
+          .send({ error: FiatConnectError.ResourceNotFound })
         }
       },
     ),
