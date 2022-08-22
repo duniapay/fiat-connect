@@ -1,4 +1,4 @@
-import { TransferStatus } from '@fiatconnect/fiatconnect-types'
+import { TransferStatus, TransferType } from '@fiatconnect/fiatconnect-types'
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity()
@@ -6,11 +6,11 @@ export class Transfer {
   @PrimaryGeneratedColumn()
   id: number
 
-  @Column({ name: 'fiatAccountId', type: 'numeric' })
-  fiatAccountId: number
+  @Column({ name: 'fiatAccountId', type: 'varchar', length: 255  })
+  fiatAccountId: string
 
-  @Column({ name: 'quoteId', type: 'numeric' })
-  quoteId: number
+  @Column({ name: 'quoteId', type: 'varchar', length: 255  })
+  quoteId: string
 
   @Column({ type: 'varchar', length: 255 })
   transferAddress?: string
@@ -21,4 +21,13 @@ export class Transfer {
     enum: TransferStatus,
   })
   status?: TransferStatus
+
+  @Column({
+    name: 'transferType',
+    type: 'enum',
+    enum: TransferType,
+  })
+  transferType?: TransferType
+
+
 }
