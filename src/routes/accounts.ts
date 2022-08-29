@@ -10,7 +10,7 @@ import {
 import { siweAuthMiddleware } from '../middleware/authenticate'
 import { Account } from '../entity/account.entity'
 import {
-  FiatConnectError,
+  FiatConnectError
 } from '@fiatconnect/fiatconnect-types'
 
 export function accountsRouter({
