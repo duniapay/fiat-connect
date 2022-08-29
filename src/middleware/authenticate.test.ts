@@ -20,6 +20,7 @@ describe('Authentication', () => {
             resetMaxAge: jest.fn(),
             save: jest.fn(),
             touch: jest.fn(),
+            siwe: null,
           },
         }
         const next = jest.fn()
