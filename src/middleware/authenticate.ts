@@ -59,11 +59,15 @@ export function siweAuthMiddleware(
   _res: express.Response,
   next: express.NextFunction,
 ) {
+  
   if (!req.session.siwe) {
     throw new UnauthorizedError()
   }
-  if (new Date() > new Date(req.session.siwe.expirationTime!)) {
-    throw new UnauthorizedError(FiatConnectError.SessionExpired)
-  }
+  const expirationDate = req.session.siwe?.expirationTime;
+
+  if(expirationDate)
+    if (new Date() > new Date(expirationDate)) {
+      throw new UnauthorizedError(FiatConnectError.SessionExpired)
+    }
   next()
 }
