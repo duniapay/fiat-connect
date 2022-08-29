@@ -2,7 +2,10 @@ import { SiweMessage } from 'siwe';
 
 
 declare module 'express-session' {
-  interface SessionData {
+  interface Session {
     siwe: SiweMessage | null
   }
 }
+
+
+export {}

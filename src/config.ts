@@ -35,7 +35,7 @@ export function loadConfig(): Config {
   // Redis Client From Configuration
   const redisClient: string =
     process.env.NODE_ENV === 'production'
-      ? `redis://${process.env.REDIS_HOST}`
+      ? `redis://${process.env.REDISCLOUD_URL}`
       : `redis://localhost:6379`
 
   const argv = yargs
@@ -66,9 +66,9 @@ export function loadConfig(): Config {
     })
     .option('redis', {
       description: 'Redis server to connect',
-      example: process.env.REDIS_HOST,
+      example: process.env.REDISCLOUD_URL,
       type: 'string',
-      default: `redis://${process.env.REDIS_HOST}` || `redis://localhost:6379`,
+      default: `redis://${process.env.REDISCLOUD_URL}` || `redis://localhost:6379`,
     })
     .parseSync()
 
