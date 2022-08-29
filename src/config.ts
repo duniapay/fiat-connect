@@ -7,6 +7,7 @@ import {
 import * as dotenv from 'dotenv'
 import yargs from 'yargs'
 import path from 'path'
+import { parse } from 'node:path/win32'
 
 export const ALFAJORES_FORNO_URL = 'https://alfajores-forno.celo-testnet.org'
 export const MAINNET_FORNO_URL = 'https://forno.celo.org'
@@ -31,7 +32,7 @@ export function loadConfig(): Config {
   // Note that this is just one possible way of dealing with configuration/environment variables.
   // Feel free to adapt this to your needs!
   dotenv.config()
-  const DEFAULT_PORT = process.env.PORT !== undefined ? Number(process.env.PORT) : 8080
+  const DEFAULT_PORT = process.env.PORT !== undefined ? parseInt(process.env.PORT, 10) : 8080
 
   const argv = yargs
     .env('')
