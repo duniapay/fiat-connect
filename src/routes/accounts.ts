@@ -11,10 +11,7 @@ import {
 import { siweAuthMiddleware } from '../middleware/authenticate'
 import { Account } from '../entity/account.entity'
 import {
-  AccountNumber,
-  DuniaWallet,
   FiatConnectError,
-  MobileMoney,
 } from '@fiatconnect/fiatconnect-types'
 
 export function accountsRouter({
