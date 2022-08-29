@@ -5,7 +5,7 @@ import { AppDataSource } from './utils/data-source'
 import { redisClient, connectRedis } from './utils/connectRedis'
 
 async function main() {
-  const { port, authConfig, sessionSecret, redisClientHostUrl } = loadConfig()
+  const { port, authConfig, sessionSecret } = loadConfig()
 
   const clientAuthMiddleware = getClientAuthMiddleware(authConfig)
 
