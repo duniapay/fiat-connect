@@ -10,6 +10,7 @@
       "build": "tsc",
       "format": "prettier --loglevel error --write \"./src/**/*.ts\"",
       "lint": "eslint --ext=.tsx,.ts --fix src/",
+      "heroku-postbuild": "npm run build",
       "start": "ts-node src/index.ts",
       "dev": "./scripts/dev.sh",
       "test": "jest",
