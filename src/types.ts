@@ -46,7 +46,6 @@ export interface Config {
   port: number
   sessionSecret: string
   openapiSpec: string
-  redisClientHostUrl: string
 }
 
 export enum ClientAuthStrategy {
