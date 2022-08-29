@@ -4,7 +4,6 @@ import { validateSchema } from '../schema/'
 import {
   DeleteFiatAccountRequestParams,
   FiatAccountSchemas,
-  NotImplementedError,
   PostFiatAccountRequestBody,
   SupportedFiatAccountSchemas,
 } from '../types'

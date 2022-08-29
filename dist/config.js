@@ -73,9 +73,9 @@ function loadConfig() {
     })
         .option('redis', {
         description: 'Redis server to connect',
-        example: process.env.REDIS_HOST,
+        example: process.env.REDISCLOUD_URL,
         type: 'string',
-        default: `redis://${process.env.REDIS_HOST}` || `redis://localhost:6379`,
+        default: `redis://${process.env.REDISCLOUD_URL}` || `redis://localhost:6379`,
     })
         .parseSync();
     return {
