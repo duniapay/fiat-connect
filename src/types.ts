@@ -73,6 +73,7 @@ export class ValidationError extends Error {
   validationError: any
   constructor(msg: string, validationError: any) {
     super(msg)
+    Object.setPrototypeOf(this, new.target.prototype);
     this.validationError = validationError
   }
 }
@@ -87,6 +88,7 @@ export class UnauthorizedError extends Error {
     msg?: string,
   ) {
     super(msg || fiatConnectError)
+    Object.setPrototypeOf(this, new.target.prototype);
     this.fiatConnectError = fiatConnectError
   }
 }
@@ -96,6 +98,7 @@ export class InvalidSiweParamsError extends Error {
 
   constructor(fiatConnectError: FiatConnectError, msg?: string) {
     super(msg || fiatConnectError)
+    Object.setPrototypeOf(this, new.target.prototype);
     this.fiatConnectError = fiatConnectError
   }
 }
