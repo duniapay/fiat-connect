@@ -7,6 +7,8 @@ import {
   FiatConnectError,
   InvalidSiweParamsError,
   NotImplementedError,
+  SUPPORTED_DOMAINS,
+  SUPPORTED_URIS,
 } from '../types'
 import { asyncRoute } from './async-route'
 
@@ -19,12 +21,14 @@ async function validateNonce(_nonce: string, _redisClient: any) {
   // nonce is already used. If a nonce is already used, must throw a NonceInUse
   // error. e.g. `throw new InvalidSiweParamsError(FiatConnectError.NonceInUser)`
   try {
+    
     const nonceInUse = await _redisClient.get(_nonce)
     // eslint-disable-next-line no-console
     if (nonceInUse) {
       throw new InvalidSiweParamsError(FiatConnectError.NonceInUse)
     }
   } catch (error) {
+
     throw new InvalidSiweParamsError(FiatConnectError.InvalidParameters)
   }
 }
@@ -81,15 +85,45 @@ function validateIssuedAtAndExpirationTime(
   }
 }
 
+
 function validateDomainAndUri(_domain: string, _uri: string) {
-  const isDomainValid =
-    _domain === 'dunia.africa' && _uri === 'https://dunia.africa'
-  if (!isDomainValid) {
+
+  const isDomainValid = validateDomain(_domain)
+  const isUriValid = validateURI(_uri)
+  if (!isDomainValid || !isUriValid) {
     throw new InvalidSiweParamsError(
       FiatConnectError.InvalidParameters,
       'Invalid domain or uri',
     )
   } else return true
+}
+
+
+function validateDomain(domain: string) {
+  switch (domain) {
+    case SUPPORTED_DOMAINS.PRODUCTION:
+      return true
+    case SUPPORTED_DOMAINS.STAGING:
+      return true
+    case SUPPORTED_DOMAINS.DEVELOPMENT:
+      return true
+    default:
+      return false
+  }  
+}
+
+
+function validateURI(uri: string) {
+  switch (uri) {
+    case SUPPORTED_URIS.PRODUCTION:
+      return true
+    case SUPPORTED_URIS.STAGING:
+      return true
+    case SUPPORTED_URIS.DEVELOPMENT:
+      return true
+    default:
+      return false
+  }  
 }
 
 export function authRouter({
