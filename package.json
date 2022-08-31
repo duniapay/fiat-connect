@@ -13,7 +13,7 @@
       "start": "ts-node src/index.ts --auth-config-option alfajores --session-secret poiii",
       "dev": "./scripts/dev.sh",
       "test": "jest",
-      "dev:server": "NODE_ENV=development nodemon --watch './**/*.ts' --exec 'ts-node' --files ./src/index.ts --auth-config-option alfajores --session-secret poiii",
+      "dev:server": "NODE_ENV=localhost nodemon --watch './**/*.ts' --exec 'ts-node' --files ./src/index.ts --auth-config-option alfajores --session-secret poiii",
       "typeorm": "typeorm-ts-node-commonjs"
    },
    "prettier": "@valora/prettier-config",

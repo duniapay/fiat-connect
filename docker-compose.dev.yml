@@ -7,7 +7,7 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - progresDB:/var/lib/postgresql/data
+      - db:/var/lib/postgresql/data
     env_file:
       - ./.env.local
 
@@ -18,10 +18,10 @@ services:
     ports:
       - '9000:6379'
     volumes:
-      - redisDB:/data
+      - cache:/data
       
 volumes:
-  progresDB:
-  redisDB:
+  db:
+  cache:
 
 
