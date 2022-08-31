@@ -1,9 +1,11 @@
 import { ethers } from 'ethers'
 import { ensureLeading0x } from '@celo/utils/lib/address'
 import fetch from 'node-fetch'
-import { SiweMessage } from 'siwe'
+import { generateNonce, SiweMessage } from 'siwe'
 
 const DOMAIN = 'dunia.africa'
+const BASE_URL = 'http://cico-staging.dunia.africa'
+
 
 /**
  * This function shows how to use SIWE for authentication with a local server via the FiatConnect API.
@@ -20,15 +22,24 @@ async function main() {
   const wallet = new ethers.Wallet(privateKey)
 
   const expirationDate = new Date(Date.now() + 14400000)  // 4 hours from now
+  const myURL = new URL(BASE_URL)
+  const hostname = myURL.hostname;
+
+  console.log('HOSTNAME', hostname)
+  console.log('HOST', myURL)
 
   const siweMessage = new SiweMessage({
-    domain: DOMAIN,
-    address: accountAddress,
+    // domain: DOMAIN,
+    // address: accountAddress,
     statement: 'Sign in with Ethereum',
-    uri: `https://${DOMAIN}`,
+    domain: hostname,
+    address: wallet.address,
+    // statement: 'Sign in with Ethereum',
+    uri: `${BASE_URL}/auth/login`,
+    // uri: `https://${DOMAIN}`,
     version: '1',
     chainId: 44787,
-    nonce: '1969340166978',
+    nonce: generateNonce(),
     expirationTime: expirationDate.toISOString(),
   })
   const message = siweMessage.prepareMessage()
@@ -36,7 +47,7 @@ async function main() {
 
   console.log(JSON.stringify({ message, signature }))
 
-  const authResponse = await fetch('http://localhost:8080/auth/login', {
+  const authResponse = await fetch('http://cico-staging.dunia.africa/auth/login', {
     method: 'POST',
     body: JSON.stringify({ message, signature }),
     headers: { 'Content-Type': 'application/json' },
