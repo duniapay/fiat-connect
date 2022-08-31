@@ -60,6 +60,18 @@ export interface AuthenticationConfig {
   chainId: number
 }
 
+export enum SUPPORTED_DOMAINS {
+  STAGING = 'cico-staging.dunia.africa',
+  PRODUCTION = 'cico.dunia.africa',
+  DEVELOPMENT = 'localhost'
+}
+
+export enum SUPPORTED_URIS {
+  STAGING = 'https://cico-staging.dunia.africa/auth/login',
+  PRODUCTION = 'https://cico.dunia.africa/auth/login',
+  DEVELOPMENT = 'http://localhost:5000/auth/login'
+}
+
 export enum Network {
   Alfajores = 'Alfajores',
   Mainnet = 'Mainnet',
