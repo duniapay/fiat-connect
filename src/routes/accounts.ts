@@ -115,7 +115,7 @@ export function accountsRouter({
         const userAddress = _req.session.siwe?.address
         // Load Repository
         const repository: Repository<Account> = dataSource.getRepository(Account)
-        const transfer = await repository.findBy({
+        const transfer = await repository.findOneBy({
           owner: userAddress,
         })
 
