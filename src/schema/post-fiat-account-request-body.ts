@@ -4,9 +4,9 @@ import {
   PostFiatAccountRequestBody,
   SupportedFiatAccountSchemas,
 } from '../types'
-import { accountNumberSchema } from './account-number'
 import { duniaWalletSchema } from './dunia-wallet'
 import { mobileMoneySchema } from './mobile-money'
+import { ibanNumberSchema } from './iban-number'
 
 export const postFiatAccountRequestBodySchema: JSONSchemaType<
   PostFiatAccountRequestBody<SupportedFiatAccountSchemas>
@@ -17,13 +17,13 @@ export const postFiatAccountRequestBodySchema: JSONSchemaType<
     fiatAccountSchema: {
       type: 'string',
       enum: [
-        FiatAccountSchema.AccountNumber,
+        FiatAccountSchema.IBANNumber,
         FiatAccountSchema.DuniaWallet,
         FiatAccountSchema.MobileMoney,
       ],
     },
     data: {
-      oneOf: [accountNumberSchema, duniaWalletSchema, mobileMoneySchema],
+      oneOf: [ibanNumberSchema, duniaWalletSchema, mobileMoneySchema],
     },
   },
   required: ['fiatAccountSchema', 'data'],
