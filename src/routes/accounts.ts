@@ -172,14 +172,16 @@ export function accountsRouter({
         console.log('formattedBankAccounts', formattedBankAccounts)
         console.log('formattedMomoAccounts', formattedMomoAccounts)
         console.log('formattedWalletAccounts', formattedWalletAccounts)
-
+        if(formattedBankAccounts.length === 0 && formattedWalletAccounts.length === 0 && formattedMomoAccounts.length === 0) {
+          return _res.status(200).send({})
+        } else {
         const resp = {
           [FiatAccountType.BankAccount]: formattedBankAccounts,
           [FiatAccountType.MobileMoney]: formattedMomoAccounts,
           [FiatAccountType.DuniaWallet]: formattedWalletAccounts,
         }
-
         return _res.status(200).send(resp)
+      }
       } catch (error) {
         console.log(error)
         return _res
