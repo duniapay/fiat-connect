@@ -81,6 +81,7 @@ export function accountsRouter({
         const entity = new Account()
         entity.institutionName = validatedData.institutionName
         entity.accountName = validatedData?.accountName
+        entity.fiatAccountType = validatedData?.fiatAccountType
         entity.owner = userAddress
         entity.fiatAccountSchema = req.body.fiatAccountSchema
         /// TODO: Generate entity based on validatedData type
