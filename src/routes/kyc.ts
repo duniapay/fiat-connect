@@ -103,6 +103,7 @@ export function kycRouter({
 
           return _res.send({ status: result?.status })
         } catch (error) {
+          console.log(error)
           return _res
             .status(404)
             .send({ error: FiatConnectError.ResourceNotFound })
@@ -135,6 +136,7 @@ export function kycRouter({
           )
           await repository.remove(result)
         } catch (error) {
+                    console.log(error)
           return _res
             .status(404)
             .send({ error: FiatConnectError.ResourceNotFound })
