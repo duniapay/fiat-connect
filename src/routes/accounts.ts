@@ -12,6 +12,7 @@ import { Account } from '../entity/account.entity'
 import {
   FiatConnectError
 } from '@fiatconnect/fiatconnect-types'
+import { Repository } from 'typeorm'
 
 export function accountsRouter({
   clientAuthMiddleware,
@@ -81,6 +82,7 @@ export function accountsRouter({
         entity.institutionName = validatedData.institutionName
         entity.accountName = validatedData?.accountName
         entity.owner = userAddress
+        entity.fiatAccountSchema = req.body.fiatAccountSchema
         /// TODO: Generate entity based on validatedData type
 
         try {
@@ -93,7 +95,7 @@ export function accountsRouter({
             accountName: entity.accountName,
             institutionName: entity.institutionName,
             fiatAccountType: entity.fiatAccountType,
-            fiatAccountSchema: `${req.body.fiatAccountSchema}Schema`,
+            fiatAccountSchema: `${req.body.fiatAccountSchema}`,
           })
         } catch (error) {
           console.log(error)
@@ -111,10 +113,13 @@ export function accountsRouter({
       try {
         const userAddress = _req.session.siwe?.address
         // Load Repository
-        const repository = dataSource.getRepository(Account)
-        const transfer = await repository.findBy({
-          owner: userAddress,
-        })
+        const repository: Repository<Account> = dataSource.getRepository(Account)
+        const transfer =  await repository.findOne({
+          where: {
+            owner: userAddress
+          }}
+        )
+        
         return _res.send(transfer)
       } catch (error) {
         console.log(error)
@@ -145,6 +150,7 @@ export function accountsRouter({
           })
 
           await repository.remove(toRemove)
+          return _res.status(200).send({})
         } catch (error) {
           return _res
             .status(404)
