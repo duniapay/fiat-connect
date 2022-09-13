@@ -10,9 +10,11 @@ import {
 import { siweAuthMiddleware } from '../middleware/authenticate'
 import { Account } from '../entity/account.entity'
 import {
+  FiatAccountSchema,
+  FiatAccountType,
   FiatConnectError
 } from '@fiatconnect/fiatconnect-types'
-import { Repository } from 'typeorm'
+import { FindOptionsWhere, Repository } from 'typeorm'
 
 export function accountsRouter({
   clientAuthMiddleware,
@@ -115,12 +117,16 @@ export function accountsRouter({
         const userAddress = _req.session.siwe?.address
         // Load Repository
         const repository: Repository<Account> = dataSource.getRepository(Account)
-        const transfer = await repository.findOneBy({
+       
+        const entity = await repository.findBy({
           owner: userAddress,
-        })
-
-        
-        return _res.send(transfer)
+        });
+        const resp = {
+          [FiatAccountType.BankAccount]: entity.filter(account => account.fiatAccountType === FiatAccountType.BankAccount),
+          [FiatAccountType.MobileMoney]: entity.filter(account => account.fiatAccountType === FiatAccountType.MobileMoney),
+          [FiatAccountType.DuniaWallet]: entity.filter(account => account.fiatAccountType === FiatAccountType.DuniaWallet),
+        }        
+        return _res.status(200).send(resp)
       } catch (error) {
         console.log(error)
         return _res
