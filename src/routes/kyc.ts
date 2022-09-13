@@ -47,6 +47,8 @@ export function kycRouter({
         >,
         _res: express.Response,
       ) => {
+        const userAddress = req.session.siwe?.address
+
         // Delegate to type-specific handlers after validation provides type guards
         const formattedSchema = validateSchema<
           KycSchemas[typeof req.params.kycSchema]
@@ -60,6 +62,7 @@ export function kycRouter({
           entity.address = formattedSchema?.address
           entity.dateOfBirth = formattedSchema?.dateOfBirth
           entity.firstName = formattedSchema?.firstName
+          entity.owner =  userAddress !== undefined ? userAddress : ''
           entity.lastName = formattedSchema?.lastName
           entity.middleName = formattedSchema?.middleName
           entity.phoneNumber = formattedSchema?.phoneNumber
@@ -93,13 +96,13 @@ export function kycRouter({
           const repository: Repository<KYC> = dataSource.getRepository(KYC)
           const userAddress = _req.session.siwe?.address
           let result;
-           if(userAddress)
+           if(userAddress !== undefined)
             result = await repository.findOne({
               where: {
                 kycSchemaName: _req.params.kycSchema,
                 owner: userAddress
               }}
-          )
+            )
 
           return _res.send({ status: result?.status })
         } catch (error) {
@@ -127,16 +130,17 @@ export function kycRouter({
 
           const userAddress = _req.session.siwe?.address
           let result;
-           if(userAddress)
+          if(userAddress !== undefined)
             result = await repository.findOne({
               where: {
                 kycSchemaName: _req.params.kycSchema,
                 owner: userAddress
               }}
-          )
+            )
           await repository.remove(result)
+          return true
         } catch (error) {
-                    console.log(error)
+          console.log(error)
           return _res
             .status(404)
             .send({ error: FiatConnectError.ResourceNotFound })
