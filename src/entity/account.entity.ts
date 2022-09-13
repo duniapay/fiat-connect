@@ -23,7 +23,7 @@ export class Account {
   institutionName: string
   @Column({ name: 'accountName', type: 'varchar', length: 255 })
   accountName: string
-  @Column({ name: 'mobile', type: 'varchar', length: 255 })
+  @Column({ name: 'mobile', type: 'varchar', length: 255, nullable: true })
   mobile?: string
   @Column({ name: 'country', type: 'varchar', length: 255 })
   country: string
