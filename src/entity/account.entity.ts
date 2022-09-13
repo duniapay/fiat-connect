@@ -25,9 +25,9 @@ export class Account {
   accountName: string
   @Column({ name: 'mobile', type: 'varchar', length: 255, nullable: true })
   mobile?: string
-  @Column({ name: 'country', type: 'varchar', length: 255 })
+  @Column({ name: 'country', type: 'varchar', length: 255, nullable: true })
   country: string
-  @Column({ name: 'accountNumber', type: 'varchar', length: 255 })
+  @Column({ name: 'accountNumber', type: 'varchar', length: 255, nullable: true })
   accountNumber?: string
   @Column({
     name: 'fiatAccountType',
