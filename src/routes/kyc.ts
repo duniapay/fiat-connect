@@ -71,7 +71,6 @@ export function kycRouter({
           await repository.save(entity)
           return _res.send({ kycStatus: KycStatus.KycPending })
         } catch (error) {
-          console.log(error)
           return _res
             .status(409)
             .send({ error: FiatConnectError.ResourceExists })
@@ -103,6 +102,7 @@ export function kycRouter({
 
           return _res.send({ status: result?.status })
         } catch (error) {
+          console.log(error)
           return _res
             .status(404)
             .send({ error: FiatConnectError.ResourceNotFound })
@@ -134,6 +134,7 @@ export function kycRouter({
 
           await repository.remove(toRemove)
         } catch (error) {
+                    console.log(error)
           return _res
             .status(404)
             .send({ error: FiatConnectError.ResourceNotFound })
