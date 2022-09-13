@@ -300,10 +300,10 @@ export function quoteRouter({
               feeType: FeeType.PlatformFee,
               feeFrequency: FeeFrequency.OneTime,
             },
-            [FiatAccountSchema.IBANNumber]: {
+            [FiatAccountSchema.AccountNumber]: {
               fiatAccountSchemas: [
                 {
-                  fiatAccountSchema: FiatAccountSchema.IBANNumber,
+                  fiatAccountSchema: FiatAccountSchema.AccountNumber,
                 },
               ],
               fee: 1,

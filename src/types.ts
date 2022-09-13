@@ -116,7 +116,7 @@ export class InvalidSiweParamsError extends Error {
 }
 
 export type SupportedFiatAccountSchemas =
-  | FiatAccountSchema.IBANNumber
+  | FiatAccountSchema.AccountNumber
   | FiatAccountSchema.DuniaWallet
   | FiatAccountSchema.MobileMoney
 
