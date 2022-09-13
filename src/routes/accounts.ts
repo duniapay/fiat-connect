@@ -168,10 +168,6 @@ export function accountsRouter({
           }
           formattedWalletAccounts.push(add)
         })
-        // TODO: Remove nulls
-        console.log('formattedBankAccounts', formattedBankAccounts)
-        console.log('formattedMomoAccounts', formattedMomoAccounts)
-        console.log('formattedWalletAccounts', formattedWalletAccounts)
         let resp;
         if(formattedBankAccounts.length === 0 && formattedWalletAccounts.length === 0 && formattedMomoAccounts.length === 0) {
           resp = {};

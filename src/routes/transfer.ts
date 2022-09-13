@@ -93,7 +93,7 @@ export function transferRouter({
 
           const results = await repository
             .save(entity)
-            await markKeyAsUsed(idempotencyKey, client,results.id)
+          await markKeyAsUsed(idempotencyKey, client,results.id)
 
           return res.send({   
             transferId: entity.id,
@@ -102,7 +102,7 @@ export function transferRouter({
             transferAddress: entity.transferAddress,
           })
         } catch (error:any) {
-        
+        console.log(error)
               console.log(error)
               res
               .status(409)
