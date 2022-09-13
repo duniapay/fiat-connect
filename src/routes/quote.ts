@@ -162,7 +162,7 @@ export function quoteRouter({
           await dataSource.getRepository(Quote).save(quoteOut)
 
           // return get quote/in response
-          return _res.send({ quoteOut })
+          return _res.send({ ...quote })
         } catch (error: any) {
           switch (error.message) {
             case FiatConnectError.CryptoNotSupported:
@@ -300,10 +300,10 @@ export function quoteRouter({
               feeType: FeeType.PlatformFee,
               feeFrequency: FeeFrequency.OneTime,
             },
-            [FiatAccountSchema.AccountNumber]: {
+            [FiatAccountSchema.IBANNumber]: {
               fiatAccountSchemas: [
                 {
-                  fiatAccountSchema: FiatAccountSchema.AccountNumber,
+                  fiatAccountSchema: FiatAccountSchema.IBANNumber,
                 },
               ],
               fee: 1,
@@ -313,7 +313,7 @@ export function quoteRouter({
           }
           const quoteOut = await dataSource.getRepository(Quote).create(quote)
           await dataSource.getRepository(Quote).save(quoteOut)
-          return _res.send({ quoteOut })
+          return _res.send({ ...quote })
         } catch (error: any) {
           switch (error.message) {
             case FiatConnectError.CryptoNotSupported:
