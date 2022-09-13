@@ -1,4 +1,5 @@
 import express from 'express'
+import { Repository } from 'typeorm'
 import { asyncRoute } from './async-route'
 import { validateSchema } from '../schema/'
 import { KycRequestParams, KycSchemas, SupportedKycSchemas } from '../types'
