@@ -123,13 +123,63 @@ export function accountsRouter({
         });
         console.log('accounts', entity)
         const bankAccounts = entity.filter(account => account.fiatAccountType === FiatAccountType.BankAccount);
-        console.log('bankAccounts', bankAccounts)
+        const momoAccounts = entity.filter(account => account.fiatAccountType === FiatAccountType.MobileMoney);
+
+        const walletAccounts = entity.filter(account => account.fiatAccountType === FiatAccountType.DuniaWallet);
+
+        let formattedBankAccounts: any[] = [];
+        let formattedMomoAccounts: any[]= [];
+        let formattedWalletAccounts: any[]=[];
+
+        bankAccounts.forEach(account => {
+          const add = {
+            fiatAccountType: account.fiatAccountType,
+            fiatAccountId: account.id,
+            fiatAccountSchema: account.fiatAccountSchema,
+            accountName: account.accountName,
+            institutionName: account.institutionName,
+            accountNumber: account?.accountNumber
+          }
+          formattedBankAccounts.push(add)
+        })
+
+        momoAccounts.forEach(account => {
+          const add = {
+            fiatAccountType: account.fiatAccountType,
+            fiatAccountId: account.id,
+            fiatAccountSchema: account.fiatAccountSchema,
+            accountName: account.accountName,
+            institutionName: account.institutionName,
+            operator: account?.operator,
+            country: account?.country,
+            mobile: account?.mobile
+          }
+          formattedMomoAccounts.push(add)
+        })
+        walletAccounts.forEach(account => {
+          const add = {
+            fiatAccountType: account.fiatAccountType,
+            fiatAccountId: account.id,
+            fiatAccountSchema: account.fiatAccountSchema,
+            accountName: account.accountName,
+            institutionName: account.institutionName,
+            operator: account?.operator,
+            country: account?.country,
+            mobile: account?.mobile
+          }
+          formattedWalletAccounts.push(add)
+        })
+        // TODO: Remove nulls
+        console.log('formattedBankAccounts', formattedBankAccounts)
+        console.log('formattedMomoAccounts', formattedMomoAccounts)
+        console.log('formattedWalletAccounts', formattedWalletAccounts)
 
         const resp = {
-          [FiatAccountType.BankAccount]: bankAccounts,
-          [FiatAccountType.MobileMoney]: entity.filter(account => account.fiatAccountType === FiatAccountType.MobileMoney),
-          [FiatAccountType.DuniaWallet]: entity.filter(account => account.fiatAccountType === FiatAccountType.DuniaWallet),
-        }        
+          [FiatAccountType.BankAccount]: formattedBankAccounts,
+          [FiatAccountType.MobileMoney]: formattedMomoAccounts,
+          [FiatAccountType.DuniaWallet]: formattedWalletAccounts,
+        }
+
         return _res.status(200).send(resp)
       } catch (error) {
         console.log(error)
