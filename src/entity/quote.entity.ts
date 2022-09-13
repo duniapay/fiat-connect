@@ -1,4 +1,4 @@
-import { CryptoType, FiatType } from '@fiatconnect/fiatconnect-types'
+import { CryptoType, FeeFrequency, FeeType, FiatAccountSchema, FiatAccountType, FiatType, TransferType } from '@fiatconnect/fiatconnect-types'
 import {
   Entity,
   Column,
@@ -10,8 +10,8 @@ import { ConversionType } from '../enums'
 
 @Entity()
 export class Quote {
-  @PrimaryGeneratedColumn()
-  id: number
+  @PrimaryGeneratedColumn('uuid')
+  id: string
 
   // @Column({ type: 'varchar', length: 255 })
   // country: string
@@ -52,9 +52,50 @@ export class Quote {
   // @Column({ name: 'guaranteedUntil', type: 'timestamptz' })
   // guaranteedUntil?: string
   @Column('simple-json')
-  quote: {}
+  quote: {
+    cryptoType: CryptoType,
+    fiatType: FiatType,
+    cryptoAmount: number
+    fiatAmount: number
+    guaranteedUntil: Date
+    quoteId: string
+    transferType: TransferType
+  }
   @Column('simple-json')
-  fiatAccount: {}
+  fiatAccount: {
+    [FiatAccountSchema.AccountNumber]? :{
+      fiatAccountSchemas: any,
+      fee: number,
+      feeType: FeeType,
+      feeFrequency: FeeFrequency,
+    },
+    [FiatAccountSchema.DuniaWallet] :{
+      fiatAccountSchemas: any,
+      fee: number,
+      feeType: FeeType,
+      feeFrequency: FeeFrequency,
+    },
+    [FiatAccountSchema.MobileMoney] :{
+      fiatAccountSchemas: any,
+      fee: number,
+      feeType: FeeType,
+      feeFrequency: FeeFrequency,
+    },
+    [FiatAccountSchema.IBANNumber]? :{
+      fiatAccountSchemas: any,
+      fee: number,
+      feeType: FeeType,
+      feeFrequency: FeeFrequency,
+    },
+    [FiatAccountSchema.IFSCAccount]? :{
+      fiatAccountSchemas: any,
+      fee: number,
+      feeType: FeeType,
+      feeFrequency: FeeFrequency,
+    },
+
+
+  }
   @Column('simple-json')
   kyc: {}
 }

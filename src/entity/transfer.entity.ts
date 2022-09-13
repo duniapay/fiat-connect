@@ -1,4 +1,4 @@
-import { TransferStatus, TransferType } from '@fiatconnect/fiatconnect-types'
+import { CryptoType, FiatType, TransferStatus, TransferType } from '@fiatconnect/fiatconnect-types'
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity()
@@ -28,6 +28,25 @@ export class Transfer {
     enum: TransferType,
   })
   transferType?: TransferType
+
+  @Column({
+    name: 'fiatType',
+    type: 'enum',
+    enum: FiatType,
+  })
+  fiatType: any
+  @Column({
+    name: 'cryptoType',
+    type: 'enum',
+    enum: CryptoType,
+  })
+  cryptoType: any
+  @Column()
+  amountProvided: number
+  @Column()
+  amountReceived: number
+  @Column()
+  fee: number
 
 
 }

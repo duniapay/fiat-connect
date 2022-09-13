@@ -116,25 +116,25 @@ export function quoteRouter({
           // Set quote properties
           quote.quote = {
             ..._req.body,
-            fiatAmount: _req.body.cryptoAmount
-              ? fiatAmount.toFixed(2)
-              : _req.body.fiatAmount,
-            cryptoAmount: _req.body.fiatAmount
+            fiatAmount: Number(_req.body.cryptoAmount)
+              ? Number(fiatAmount.toFixed(2))
+              : Number(_req.body.fiatAmount),
+            cryptoAmount: Number(_req.body.fiatAmount)
               ? cryptoAmount
-              : _req.body.cryptoAmount,
+              : Number(_req.body.cryptoAmount),
             guaranteedUntil: guaranteedUntil,
             quoteId: quoteId,
             transferType: TransferType.TransferIn,
-          }
-          ;(quote.kyc = {
+          };
+          quote.kyc = {
             kycRequired: true,
             kycSchemas: [
               {
                 kycSchema: KycSchema.PersonalDataAndDocuments,
               },
             ],
-          }),
-            (quote.fiatAccount = {
+          }
+            quote.fiatAccount = {
               [FiatAccountSchema.MobileMoney]: {
                 fiatAccountSchemas: [
                   {
@@ -155,7 +155,7 @@ export function quoteRouter({
                 feeType: FeeType.PlatformFee,
                 feeFrequency: FeeFrequency.OneTime,
               },
-            })
+            }
 
             // Save quote in database
           const quoteOut = await dataSource.getRepository(Quote).create(quote)
@@ -261,12 +261,12 @@ export function quoteRouter({
 
           quote.quote = {
             ..._req.body,
-            fiatAmount: _req.body.cryptoAmount
-              ? fiatAmount.toFixed(2)
-              : _req.body.fiatAmount,
-            cryptoAmount: _req.body.fiatAmount
+            fiatAmount: Number(_req.body.cryptoAmount)
+              ? Number(fiatAmount.toFixed(2))
+              : Number(_req.body.fiatAmount),
+            cryptoAmount: Number(_req.body.fiatAmount)
               ? cryptoAmount
-              : _req.body.cryptoAmount,
+              : Number(_req.body.cryptoAmount),
             guaranteedUntil: guaranteedUntil,
             quoteId: quoteId,
             transferType: TransferType.TransferIn,

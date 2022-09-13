@@ -14,6 +14,9 @@ import { ensureLeading0x } from '@celo/utils/lib/address'
 
 
 import * as dotenv from 'dotenv'
+import { Quote } from '../entity/quote.entity'
+import { Repository } from 'typeorm'
+import { Account } from '../entity/account.entity'
 
 dotenv.config()
 
@@ -35,7 +38,10 @@ export function transferRouter({
 }): express.Router {
   const router = express.Router()
     // Load Repository
-    const repository = dataSource.getRepository(Transfer)
+    const repository: Repository<Transfer> = dataSource.getRepository(Transfer)
+    const quoteRepository: Repository<Quote> = dataSource.getRepository(Quote)
+    const accountRepository: Repository<Account> = dataSource.getRepository(Account)
+
     const entity = new Transfer()
 
   router.use(siweAuthMiddleware)
@@ -146,23 +152,38 @@ export function transferRouter({
             
           const publicKey = new ethers.utils.SigningKey(RECEIVER_PRIVATE_KEY).compressedPublicKey
           const transferAddress = ethers.utils.computeAddress(ensureLeading0x(publicKey))
-
+          const quote = await quoteRepository.findOneBy({
+            id: req.body.quoteId,
+          })
+          const account = await accountRepository.findOneBy({
+            id: req.body.fiatAccountId,
+          })
+          const o = account?.fiatAccountSchema;
 
           entity.quoteId = req.body.quoteId
           entity.fiatAccountId = req.body.fiatAccountId
           entity.status = TransferStatus.TransferStarted
           entity.transferAddress = transferAddress
           entity.transferType = TransferType.TransferOut
+          entity.fiatType = quote?.quote?.fiatType
+          entity.cryptoType = quote?.quote?.cryptoType
+          if(quote?.quote !== undefined){
+            entity.amountProvided = quote?.quote?.cryptoAmount
+            entity.amountReceived =  quote?.quote?.fiatAmount
+          }
+          if(o !== undefined && quote?.fiatAccount !== undefined){
+            const a = quote?.fiatAccount[o];
+            entity.fee =  a!== undefined ? a?.fee : 0
+          }
 
           const results =  await repository
             .save(entity)
 
-            await markKeyAsUsed(idempotencyKey, client,results.id)
+          await markKeyAsUsed(idempotencyKey, client,results.id)
 
-            return res.send({   
-              transferId: results.id,
+          return res.send({   
+              transferId: entity.id,
               transferStatus: entity.status,
-              
               // Address that the user must send funds to
               transferAddress: entity.transferAddress,
             })
@@ -193,18 +214,19 @@ export function transferRouter({
           const transfer = await repository.findOneBy({
             id: req.params.transferId,
           })
+      
           return res.send(
             {
-              status: transfer.status,
-              transferType: transfer.transferType,              
-              fiatType: `FiatTypeEnum`,
-              cryptoType: `CryptoTypeEnum`,
-              amountProvided: `string`,
-              amountReceived: `string`,
-              fee: `string`,
-              fiatAccountId: transfer.fiatAccountId,
-              transferId: transfer.id,
-              transferAddress: transfer.transferAddress,
+              status: transfer?.status,
+              transferType: transfer?.transferType,              
+              fiatType: transfer?.fiatType,
+              cryptoType: transfer?.cryptoType,
+              amountProvided: transfer?.amountProvided,
+              amountReceived: transfer?.amountReceived,
+              fee: transfer?.fee,
+              fiatAccountId: transfer?.fiatAccountId,
+              transferId: transfer?.id,
+              transferAddress: transfer?.transferAddress,
             }
           )
         } catch (error) {
