@@ -138,7 +138,7 @@ export function kycRouter({
               }}
             )
           await repository.remove(result)
-          return true
+          return _res.status(200).send({})
         } catch (error) {
           console.log(error)
           return _res
