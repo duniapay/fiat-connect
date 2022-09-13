@@ -16,6 +16,7 @@ export class Account {
     name: 'operator',
     type: 'enum',
     enum: SupportedOperatorEnum,
+    nullable: true
   })
   operator?: SupportedOperatorEnum
   @Column({ name: 'institutionName', type: 'varchar', length: 255 })
