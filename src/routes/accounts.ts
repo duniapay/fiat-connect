@@ -96,6 +96,7 @@ export function accountsRouter({
             fiatAccountSchema: `${req.body.fiatAccountSchema}Schema`,
           })
         } catch (error) {
+          console.log(error)
           return _res
             .status(409)
             .send({ error: FiatConnectError.ResourceExists })
