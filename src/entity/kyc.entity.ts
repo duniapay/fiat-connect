@@ -7,9 +7,6 @@ export class KYC {
   @PrimaryGeneratedColumn()
   id: number
 
-  @Column({ name: 'kycRequired', type: 'bool' })
-  kycRequired: boolean
-
   @Column({
     name: 'kycSchemaName',
     type: 'enum',
