@@ -116,6 +116,7 @@ export function accountsRouter({
         })
         return _res.send(transfer)
       } catch (error) {
+        console.log(error)
         return _res
           .status(404)
           .send({ error: FiatConnectError.ResourceNotFound })
