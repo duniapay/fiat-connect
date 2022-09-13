@@ -29,7 +29,7 @@ async function validateNonce(_nonce: string, _redisClient: any) {
     }
   } catch (error) {
 
-    throw new InvalidSiweParamsError(FiatConnectError.InvalidParameters)
+    throw new InvalidSiweParamsError(FiatConnectError.NonceInUse)
   }
 }
 
