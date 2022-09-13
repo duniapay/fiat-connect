@@ -121,8 +121,12 @@ export function accountsRouter({
         const entity = await repository.findBy({
           owner: userAddress,
         });
+        console.log('accounts', entity)
+        const bankAccounts = entity.filter(account => account.fiatAccountType === FiatAccountType.BankAccount);
+        console.log('bankAccounts', bankAccounts)
+
         const resp = {
-          [FiatAccountType.BankAccount]: entity.filter(account => account.fiatAccountType === FiatAccountType.BankAccount),
+          [FiatAccountType.BankAccount]: bankAccounts,
           [FiatAccountType.MobileMoney]: entity.filter(account => account.fiatAccountType === FiatAccountType.MobileMoney),
           [FiatAccountType.DuniaWallet]: entity.filter(account => account.fiatAccountType === FiatAccountType.DuniaWallet),
         }        
