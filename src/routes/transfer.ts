@@ -88,13 +88,31 @@ export function transferRouter({
           // Load the corresponding privateKey
           const publicKey = new ethers.utils.SigningKey(SENDER_PRIVATE_KEY).compressedPublicKey
           const transferAddress = ethers.utils.computeAddress(ensureLeading0x(publicKey))
-
+          const [account, quote] = await Promise.all([ 
+            accountRepository.findOneBy({
+            id: req.body.fiatAccountId,
+          }),
+           quoteRepository.findOneBy({
+            id: req.body.quoteId,
+          })
+        ])
+          const o = account?.fiatAccountSchema;
 
           entity.quoteId = req.body.quoteId
           entity.fiatAccountId = req.body.fiatAccountId
           entity.status = TransferStatus.TransferStarted
           entity.transferAddress = transferAddress
           entity.transferType = TransferType.TransferIn
+          entity.fiatType = quote?.quote?.fiatType
+          entity.cryptoType = quote?.quote?.cryptoType
+          if(quote?.quote !== undefined){
+            entity.amountProvided = quote?.quote?.fiatAmount
+            entity.amountReceived =  quote?.quote?.cryptoAmount
+          }
+          if(o !== undefined && quote?.fiatAccount !== undefined){
+            const a = quote?.fiatAccount[o];
+            entity.fee =  a!== undefined ? a?.fee : 0
+          }
         
 
           const results = await repository
@@ -152,12 +170,14 @@ export function transferRouter({
             
           const publicKey = new ethers.utils.SigningKey(RECEIVER_PRIVATE_KEY).compressedPublicKey
           const transferAddress = ethers.utils.computeAddress(ensureLeading0x(publicKey))
-          const quote = await quoteRepository.findOneBy({
+          const [account, quote] = await Promise.all([ 
+            accountRepository.findOneBy({
+            id: req.body.fiatAccountId,
+          }),
+           quoteRepository.findOneBy({
             id: req.body.quoteId,
           })
-          const account = await accountRepository.findOneBy({
-            id: req.body.fiatAccountId,
-          })
+        ])
           const o = account?.fiatAccountSchema;
 
           entity.quoteId = req.body.quoteId
