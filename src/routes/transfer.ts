@@ -167,9 +167,7 @@ export function transferRouter({
               transferAddress: entity.transferAddress,
             })
         } catch (error: any) {
-        
-          
-         
+              console.log(error)         
               res
               .status(409)
               .send({ error: FiatConnectError.ResourceExists })
