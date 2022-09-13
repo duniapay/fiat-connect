@@ -33,14 +33,17 @@ export class Account {
     name: 'fiatAccountType',
     type: 'enum',
     enum: FiatAccountType,
+    nullable: true
   })
+  fiatAccountType: FiatAccountType
+
   @Column({ name: 'owner', type: 'varchar', length: 255 })
   owner: string
-  fiatAccountType: FiatAccountType
   @Column({
     name: 'fiatAccountSchema',
     type: 'enum',
     enum: FiatAccountSchema,
+    nullable: true
   })
   fiatAccountSchema: FiatAccountSchema
 }
