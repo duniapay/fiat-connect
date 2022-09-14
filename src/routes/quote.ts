@@ -39,7 +39,6 @@ export function quoteRouter({
 }): express.Router {
   const router = express.Router()
   router.use(clientAuthMiddleware)
-  const quoteId = uuidv4()
 
   router.use(
     (
@@ -120,18 +119,18 @@ export function quoteRouter({
               ? cryptoAmount
               : _req.body.cryptoAmount,
             guaranteedUntil: guaranteedUntil,
-            quoteId: quoteId,
+            quoteId: quote.id,
             transferType: TransferType.TransferIn,
-          }
-          ;(quote.kyc = {
+          };
+          quote.kyc = {
             kycRequired: true,
             kycSchemas: [
               {
                 kycSchema: KycSchema.PersonalDataAndDocuments,
               },
             ],
-          }),
-            (quote.fiatAccount = {
+          },
+            quote.fiatAccount = {
               [FiatAccountSchema.MobileMoney]: {
                 fiatAccountSchemas: [
                   {
@@ -152,11 +151,12 @@ export function quoteRouter({
                 feeType: FeeType.PlatformFee,
                 feeFrequency: FeeFrequency.OneTime,
               },
-            })
+            }
 
           // Save quote in database
           const quoteOut = await dataSource.getRepository(Quote).create(quote)
           await dataSource.getRepository(Quote).save(quoteOut)
+          console.log('quoteOut', quoteOut)
 
           // return get quote/in response
           return _res.send({ ...quote })
@@ -265,7 +265,7 @@ export function quoteRouter({
               ? cryptoAmount
               : _req.body.cryptoAmount,
             guaranteedUntil: guaranteedUntil,
-            quoteId: quoteId,
+            quoteId: quote.id,
             transferType: TransferType.TransferIn,
           }
           quote.kyc = {

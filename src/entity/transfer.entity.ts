@@ -42,9 +42,9 @@ export class Transfer {
   })
   cryptoType: any
   @Column({name: 'amountProvided'})
-  amountProvided: number
+  amountProvided: string
   @Column({name: 'amountReceived'})
-  amountReceived: number
+  amountReceived: string
   @Column({name: 'fee'})
-  fee: number
+  fee: string
 }
