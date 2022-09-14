@@ -1,4 +1,9 @@
-import { CryptoType, FiatType, TransferStatus, TransferType } from '@fiatconnect/fiatconnect-types'
+import {
+  CryptoType,
+  FiatType,
+  TransferStatus,
+  TransferType,
+} from '@fiatconnect/fiatconnect-types'
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity()
@@ -41,10 +46,10 @@ export class Transfer {
     enum: CryptoType,
   })
   cryptoType: any
-  @Column({name: 'amountProvided'})
+  @Column({ name: 'amountProvided' })
   amountProvided: string
-  @Column({name: 'amountReceived'})
+  @Column({ name: 'amountReceived' })
   amountReceived: string
-  @Column({name: 'fee'})
+  @Column({ name: 'fee' })
   fee: string
 }

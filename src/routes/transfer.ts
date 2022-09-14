@@ -82,13 +82,18 @@ export function transferRouter({
         req: express.Request<{}, {}, TransferRequestBody>,
         res: express.Response,
       ) => {
-        const idempotencyKey = req.headers['idempotency-key'] as string
-        const headers = req.headers
+        const idempotencyKey = req.headers['idempotency-key']?.toString()
 
-        console.log('headers', headers)
-        const isValid = await validateIdempotencyKey(idempotencyKey, client)
+        console.log('idempotencyKey', idempotencyKey)
+
+        let isKeyValid
+        if (idempotencyKey) {
+          isKeyValid = await validateIdempotencyKey(idempotencyKey, client)
+        } else {
+          return res.status(422).send('Unprocessable Entity')
+        }
         // Check if the idempotency key is already in the cache
-        if (isValid) {
+        if (isKeyValid) {
           try {
             // Load the corresponding privateKey
             const publicKey = new ethers.utils.SigningKey(SENDER_PRIVATE_KEY)
@@ -105,17 +110,17 @@ export function transferRouter({
             const quote = await quoteRepository.findOneBy({
               id: req.body.quoteId,
             })
-            const fiatAccounts = quote?.fiatAccount;
-            const detailledQuote: any = quote?.quote;
+            const fiatAccounts = quote?.fiatAccount
+            const detailledQuote: any = quote?.quote
 
             console.log('fiatAccounts', fiatAccounts)
             console.log('detailledQuote', detailledQuote)
 
-            entity.fiatType = detailledQuote?.fiatType;
-            entity.cryptoType= detailledQuote?.cryptoType;
-            entity.amountProvided= detailledQuote?.fiatAmount.toString();
-            entity.amountReceived= detailledQuote?.cryptoAmount.toString();
-            entity.fee = '0';
+            entity.fiatType = detailledQuote?.fiatType
+            entity.cryptoType = detailledQuote?.cryptoType
+            entity.amountProvided = detailledQuote?.fiatAmount.toString()
+            entity.amountReceived = detailledQuote?.cryptoAmount.toString()
+            entity.fee = '0'
             const results = await repository.save(entity)
             await markKeyAsUsed(idempotencyKey, client, results.id)
 
@@ -130,9 +135,7 @@ export function transferRouter({
             res.status(409).send({ error: FiatConnectError.ResourceExists })
           }
         }
-        res.status(422).send(
-           "Unprocessable Entity",
-        )
+        res.status(422).send('Unprocessable Entity')
       },
     ),
   )
@@ -145,14 +148,11 @@ export function transferRouter({
         req: express.Request<{}, {}, TransferRequestBody>,
         res: express.Response,
       ) => {
-        const idempotencyKey = req.headers['idempotency-key'] as string
-        const headers = req.headers
+        const idempotencyKey = req.headers['idempotency-key']?.toString()
 
-        console.log('headers', headers)
+        console.log('idempotencyKey', idempotencyKey)
         if (!idempotencyKey) {
-          return res
-            .status(422)
-            .send({ error: FiatConnectError.InvalidParameters })
+          return res.status(422).send('Unprocessable Entity')
         }
 
         const isValid = await validateIdempotencyKey(idempotencyKey, client)
@@ -176,17 +176,17 @@ export function transferRouter({
             const quote = await quoteRepository.findOneBy({
               id: req.body.quoteId,
             })
-            const fiatAccounts = quote?.fiatAccount;
-            const detailledQuote: any = quote?.quote;
+            const fiatAccounts = quote?.fiatAccount
+            const detailledQuote: any = quote?.quote
 
             console.log('fiatAccounts', fiatAccounts)
             console.log('detailledQuote', detailledQuote)
 
-            entity.fiatType = detailledQuote?.fiatType;
-            entity.cryptoType= detailledQuote?.cryptoType;
-            entity.amountProvided= detailledQuote?.cryptoAmount.toString();
-            entity.amountReceived= detailledQuote?.fiatAmount.toString() ;
-            entity.fee= '0';
+            entity.fiatType = detailledQuote?.fiatType
+            entity.cryptoType = detailledQuote?.cryptoType
+            entity.amountProvided = detailledQuote?.cryptoAmount.toString()
+            entity.amountReceived = detailledQuote?.fiatAmount.toString()
+            entity.fee = '0'
             const results = await repository.save(entity)
 
             await markKeyAsUsed(idempotencyKey, client, results.id)
@@ -222,7 +222,7 @@ export function transferRouter({
           const transfer = await repository.findOneBy({
             id: req.params.transferId,
           })
-          
+
           return res.send({
             status: transfer.status,
             transferType: transfer.transferType,

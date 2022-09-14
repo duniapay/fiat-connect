@@ -78,7 +78,7 @@ export function quoteRouter({
           isValidAmount(_req.body)
           // Create new Quote Entity
           const quote = new Quote()
-          quote.id = v4();
+          quote.id = v4()
 
           let tokenPrice = 0
 
@@ -122,16 +122,16 @@ export function quoteRouter({
             guaranteedUntil: guaranteedUntil,
             quoteId: quote.id,
             transferType: TransferType.TransferIn,
-          };
-          quote.kyc = {
+          }
+          ;(quote.kyc = {
             kycRequired: true,
             kycSchemas: [
               {
                 kycSchema: KycSchema.PersonalDataAndDocuments,
               },
             ],
-          },
-            quote.fiatAccount = {
+          }),
+            (quote.fiatAccount = {
               [FiatAccountSchema.MobileMoney]: {
                 fiatAccountSchemas: [
                   {
@@ -152,7 +152,7 @@ export function quoteRouter({
                 feeType: FeeType.PlatformFee,
                 feeFrequency: FeeFrequency.OneTime,
               },
-            }
+            })
 
           // Save quote in database
           const quoteOut = await dataSource.getRepository(Quote).create(quote)
@@ -231,7 +231,7 @@ export function quoteRouter({
           isSupportedCrypto(_req.body)
           isValidAmount(_req.body)
           const quote = new Quote()
-          quote.id = v4();
+          quote.id = v4()
 
           let tokenPrice = 0
           if (_req.body.cryptoAmount && COINMARKETCAP_KEY)
