@@ -124,7 +124,6 @@ export function transferRouter({
             })
           } catch (error: any) {
             console.log(error)
-            console.log(error)
             res.status(409).send({ error: FiatConnectError.ResourceExists })
           }
         }

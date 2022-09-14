@@ -42,7 +42,7 @@
       "express": "^4.17.2",
       "express-idempotency": "^1.0.5",
       "express-session": "^1.17.3",
-      "@fiatconnect/fiatconnect-sdk": "^0.3.5",
+      "@fiatconnect/fiatconnect-sdk": "^0.3.8",
       "pg": "^8.4.0",
       "prettier": "^2.7.1",
       "redis": "^4.2.0",

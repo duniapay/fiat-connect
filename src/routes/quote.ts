@@ -5,7 +5,7 @@ import { validateSchema } from '../schema/'
 import { QuoteRequestBody } from '../types'
 import { Quote } from '../entity/quote.entity'
 import axios, { AxiosRequestHeaders } from 'axios'
-import { v4 as uuidv4 } from 'uuid'
+import { v4 as uuidv4, v4 } from 'uuid'
 
 import {
   CryptoType,
@@ -78,6 +78,7 @@ export function quoteRouter({
           isValidAmount(_req.body)
           // Create new Quote Entity
           const quote = new Quote()
+          quote.id = v4();
 
           let tokenPrice = 0
 
@@ -230,6 +231,7 @@ export function quoteRouter({
           isSupportedCrypto(_req.body)
           isValidAmount(_req.body)
           const quote = new Quote()
+          quote.id = v4();
 
           let tokenPrice = 0
           if (_req.body.cryptoAmount && COINMARKETCAP_KEY)

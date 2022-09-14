@@ -5,12 +5,13 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  PrimaryColumn,
 } from 'typeorm'
 import { ConversionType } from '../enums'
 
 @Entity()
 export class Quote {
-  @PrimaryGeneratedColumn("uuid")
+  @PrimaryColumn()
   id: string
 
   // @Column({ type: 'varchar', length: 255 })
