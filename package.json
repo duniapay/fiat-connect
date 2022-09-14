@@ -12,6 +12,7 @@
       "lint": "eslint --ext=.tsx,.ts --fix src/",
       "start": "ts-node src/index.ts --auth-config-option alfajores --session-secret poiii",
       "dev": "./scripts/dev.sh",
+      "version": "auto-changelog -p && git add CHANGELOG.md",
       "test": "jest",
       "dev:server": "NODE_ENV=localhost nodemon --watch './**/*.ts' --exec 'ts-node' --files ./src/index.ts --auth-config-option alfajores --session-secret poiii",
       "typeorm": "typeorm-ts-node-commonjs"
@@ -20,6 +21,7 @@
    "license": "MIT",
    "dependencies": {
       "@celo/utils": "^1.5.2",
+      "@fiatconnect/fiatconnect-sdk": "^0.3.8",
       "@fiatconnect/fiatconnect-types": "^7.0.3",
       "@types/express": "^4.17.13",
       "@types/node": "^17.0.21",
@@ -42,7 +44,6 @@
       "express": "^4.17.2",
       "express-idempotency": "^1.0.5",
       "express-session": "^1.17.3",
-      "@fiatconnect/fiatconnect-sdk": "^0.3.8",
       "pg": "^8.4.0",
       "prettier": "^2.7.1",
       "redis": "^4.2.0",
@@ -57,6 +58,7 @@
       "@types/chai": "^4.3.1",
       "@types/express-session": "^1.17.4",
       "@types/jest": "^27.4.1",
+      
       "@types/node": "^16.11.10",
       "@types/node-fetch": "2",
       "@types/supertest": "^2.0.11",
@@ -65,6 +67,7 @@
       "@typescript-eslint/eslint-plugin": "^5.29.0",
       "@valora/eslint-config-typescript": "^1.0.0",
       "@valora/prettier-config": "^0.0.1",
+      "auto-changelog": "2.4.0",
       "eslint": "^8.18.0",
       "eslint-plugin-chai-expect": "^3.0.0",
       "jest": "^27.5.1",
