@@ -7,7 +7,7 @@
     "node": "^16"
   },
   "scripts": {
-    "build": "tsc",
+    "postinstall": "tsc",
     "format": "prettier --loglevel error --write \"./src/**/*.ts\"",
     "lint": "eslint --ext=.tsx,.ts --fix src/",
     "dev": "./scripts/dev.sh",
