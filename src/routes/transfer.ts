@@ -102,18 +102,16 @@ export function transferRouter({
               id: req.body.quoteId,
             })
             const fiatAccounts = quote?.fiatAccount;
-            const detailledQuote = quote?.quote;
-            const kyc = quote?.kyc;
+            const detailledQuote: any = quote?.quote;
 
             console.log('fiatAccounts', fiatAccounts)
             console.log('detailledQuote', detailledQuote)
-            console.log('kyc', kyc)
 
-            entity.fiatType = FiatType.XOF;
-            entity.cryptoType= CryptoType.cUSD;
-            entity.amountProvided= '0';
-            entity.amountReceived= '0';
-            entity.fee= '0';
+            entity.fiatType = detailledQuote?.fiatType;
+            entity.cryptoType= detailledQuote?.cryptoType;
+            entity.amountProvided= detailledQuote?.fiatAmount.toString();
+            entity.amountReceived= detailledQuote?.cryptoAmount.toString();
+            entity.fee = '0';
             const results = await repository.save(entity)
             await markKeyAsUsed(idempotencyKey, client, results.id)
 
@@ -174,18 +172,15 @@ export function transferRouter({
               id: req.body.quoteId,
             })
             const fiatAccounts = quote?.fiatAccount;
-            const detailledQuote = quote?.quote;
-            const kyc = quote?.kyc;
-            console.log('quote', quote)
+            const detailledQuote: any = quote?.quote;
 
             console.log('fiatAccounts', fiatAccounts)
             console.log('detailledQuote', detailledQuote)
-            console.log('kyc', kyc)
 
-            entity.fiatType = FiatType.XOF;
-            entity.cryptoType= CryptoType.cUSD;
-            entity.amountProvided= '0';
-            entity.amountReceived= '0';
+            entity.fiatType = detailledQuote?.fiatType;
+            entity.cryptoType= detailledQuote?.cryptoType;
+            entity.amountProvided= detailledQuote?.cryptoAmount.toString();
+            entity.amountReceived= detailledQuote?.fiatAmount.toString() ;
             entity.fee= '0';
             const results = await repository.save(entity)
 
