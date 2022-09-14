@@ -1,1 +1,0 @@
-{"version":3,"file":"transfer-request-body.js","sourceRoot":"","sources":["../../src/schema/transfer-request-body.ts"],"names":[],"mappings":";;;AAGa,QAAA,yBAAyB,GAAwC;IAC5E,GAAG,EAAE,2BAA2B;IAChC,IAAI,EAAE,QAAQ;IACd,UAAU,EAAE;QACV,aAAa,EAAE;YACb,IAAI,EAAE,QAAQ;SACf;QACD,OAAO,EAAE;YACP,IAAI,EAAE,QAAQ;SACf;KACF;IACD,QAAQ,EAAE,CAAC,eAAe,EAAE,SAAS,CAAC;CACvC,CAAA"}
