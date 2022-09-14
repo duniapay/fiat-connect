@@ -1,15 +1,18 @@
-name: Danger JS
+name: Danger CI
+
 on: [pull_request]
+
 jobs:
-  test:
+  build:
+
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@master
-    - name: Use Node 16
-    - uses: actions/setup-node@v3
-      with:
-        node-version: 16
-    - name: Danger
-      run: npx danger ci
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v3
+      - name: Use Node 16.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+      - run: npx danger ci
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
