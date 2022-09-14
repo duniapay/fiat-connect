@@ -11,7 +11,7 @@
     "format": "prettier --loglevel error --write \"./src/**/*.ts\"",
     "lint": "eslint --ext=.tsx,.ts --fix src/",
     "dev": "./scripts/dev.sh",
-    "start": "AUTH_CONFIG_OPTION=alfajores SESSION_SECRET=pouuuuuu ./scripts/start.sh",
+    "start": "./scripts/start.sh",
     "test": "jest",
     "dev:server": "NODE_ENV=localhost nodemon --watch './**/*.ts' --exec 'ts-node' --files ./src/index.ts --auth-config-option alfajores --session-secret poiii",
     "typeorm": "typeorm-ts-node-commonjs"
