@@ -10,8 +10,8 @@ import { ConversionType } from '../enums'
 
 @Entity()
 export class Quote {
-  @PrimaryGeneratedColumn()
-  id: number
+  @PrimaryGeneratedColumn("uuid")
+  id: string
 
   // @Column({ type: 'varchar', length: 255 })
   // country: string

@@ -16,6 +16,7 @@ import { ensureLeading0x } from '@celo/utils/lib/address'
 
 import * as dotenv from 'dotenv'
 import { Quote } from '../entity/quote.entity'
+import { Repository } from 'typeorm'
 
 dotenv.config()
 
@@ -42,7 +43,7 @@ export function transferRouter({
   const router = express.Router()
   // Load Repository
   const repository = dataSource.getRepository(Transfer)
-  const quoteRepository = dataSource.getRepository(Quote)
+  const quoteRepository: Repository<Quote> = dataSource.getRepository(Quote)
 
   const entity = new Transfer()
 
@@ -97,12 +98,12 @@ export function transferRouter({
             entity.status = TransferStatus.TransferStarted
             entity.transferAddress = transferAddress
             entity.transferType = TransferType.TransferIn
-            const quote: Quote = await quoteRepository.findOneBy({
+            const quote = await quoteRepository.findOneBy({
               id: req.body.quoteId,
             })
-            const fiatAccounts = quote.fiatAccount;
-            const detailledQuote = quote.quote;
-            const kyc = quote.kyc;
+            const fiatAccounts = quote?.fiatAccount;
+            const detailledQuote = quote?.quote;
+            const kyc = quote?.kyc;
 
             console.log('fiatAccounts', fiatAccounts)
             console.log('detailledQuote', detailledQuote)
@@ -169,12 +170,12 @@ export function transferRouter({
             entity.status = TransferStatus.TransferStarted
             entity.transferAddress = transferAddress
             entity.transferType = TransferType.TransferOut
-            const quote: Quote = await quoteRepository.findOneBy({
+            const quote = await quoteRepository.findOneBy({
               id: req.body.quoteId,
             })
-            const fiatAccounts = quote.fiatAccount;
-            const detailledQuote = quote.quote;
-            const kyc = quote.kyc;
+            const fiatAccounts = quote?.fiatAccount;
+            const detailledQuote = quote?.quote;
+            const kyc = quote?.kyc;
             
             console.log('fiatAccounts', fiatAccounts)
             console.log('detailledQuote', detailledQuote)
