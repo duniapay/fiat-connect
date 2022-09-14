@@ -54,6 +54,7 @@ export function transferRouter({
     _res: express.Response,
     next: express.NextFunction,
   ) => {
+    console.log('TransferRequestBodySchema', req.body)
     req.body = validateSchema<TransferRequestBody>(
       req.body,
       'TransferRequestBodySchema',
