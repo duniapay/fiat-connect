@@ -28,9 +28,6 @@ const MAX_CRYPTO_AMOUNT = 10
 
 const USD_XOF_RATE = 650
 
-
-
-
 export function quoteRouter({
   clientAuthMiddleware,
   client,
@@ -103,10 +100,10 @@ export function quoteRouter({
                 tokenPrice = res.data.data.CUSD.quote.USD.price
               })
               .catch((err) => err)
-            // Estimate fiat amount
+          // Estimate fiat amount
           const fiatAmount =
             Number(_req.body.cryptoAmount) * Number(tokenPrice) * USD_XOF_RATE
-                        // Estimate crypto amount
+          // Estimate crypto amount
 
           const cryptoAmount = Number(_req.body.fiatAmount) / USD_XOF_RATE
           // Set quote validity
@@ -116,25 +113,25 @@ export function quoteRouter({
           // Set quote properties
           quote.quote = {
             ..._req.body,
-            fiatAmount: Number(_req.body.cryptoAmount)
-              ? Number(fiatAmount.toFixed(2))
-              : Number(_req.body.fiatAmount),
-            cryptoAmount: Number(_req.body.fiatAmount)
+            fiatAmount: _req.body.cryptoAmount
+              ? fiatAmount.toFixed(2)
+              : _req.body.fiatAmount,
+            cryptoAmount: _req.body.fiatAmount
               ? cryptoAmount
-              : Number(_req.body.cryptoAmount),
+              : _req.body.cryptoAmount,
             guaranteedUntil: guaranteedUntil,
             quoteId: quoteId,
             transferType: TransferType.TransferIn,
-          };
-          quote.kyc = {
+          }
+          ;(quote.kyc = {
             kycRequired: true,
             kycSchemas: [
               {
                 kycSchema: KycSchema.PersonalDataAndDocuments,
               },
             ],
-          }
-            quote.fiatAccount = {
+          }),
+            (quote.fiatAccount = {
               [FiatAccountSchema.MobileMoney]: {
                 fiatAccountSchemas: [
                   {
@@ -155,9 +152,9 @@ export function quoteRouter({
                 feeType: FeeType.PlatformFee,
                 feeFrequency: FeeFrequency.OneTime,
               },
-            }
+            })
 
-            // Save quote in database
+          // Save quote in database
           const quoteOut = await dataSource.getRepository(Quote).create(quote)
           await dataSource.getRepository(Quote).save(quoteOut)
 
@@ -261,12 +258,12 @@ export function quoteRouter({
 
           quote.quote = {
             ..._req.body,
-            fiatAmount: Number(_req.body.cryptoAmount)
-              ? Number(fiatAmount.toFixed(2))
-              : Number(_req.body.fiatAmount),
-            cryptoAmount: Number(_req.body.fiatAmount)
+            fiatAmount: _req.body.cryptoAmount
+              ? fiatAmount.toFixed(2)
+              : _req.body.fiatAmount,
+            cryptoAmount: _req.body.fiatAmount
               ? cryptoAmount
-              : Number(_req.body.cryptoAmount),
+              : _req.body.cryptoAmount,
             guaranteedUntil: guaranteedUntil,
             quoteId: quoteId,
             transferType: TransferType.TransferIn,
@@ -402,7 +399,6 @@ function isValidAmount(body: QuoteRequestBody) {
     }
   }
 }
-
 
 function isSupportedGeo(
   country: string,

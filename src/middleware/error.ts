@@ -21,9 +21,8 @@ export const errorToStatusCode = (
     error instanceof InvalidSiweParamsError
   ) {
     res.status(401).json({
-      error: error.fiatConnectError
+      error: error.fiatConnectError,
     })
-    
   } else {
     next(error)
   }

@@ -12,7 +12,7 @@ import { Account } from '../entity/account.entity'
 import {
   FiatAccountSchema,
   FiatAccountType,
-  FiatConnectError
+  FiatConnectError,
 } from '@fiatconnect/fiatconnect-types'
 import { FindOptionsWhere, Repository } from 'typeorm'
 
@@ -116,22 +116,29 @@ export function accountsRouter({
       try {
         const userAddress = _req.session.siwe?.address
         // Load Repository
-        const repository: Repository<Account> = dataSource.getRepository(Account)
-       
+        const repository: Repository<Account> =
+          dataSource.getRepository(Account)
+
         const entity = await repository.findBy({
           owner: userAddress,
-        });
+        })
         console.log('accounts', entity)
-        const bankAccounts = entity.filter(account => account.fiatAccountType === FiatAccountType.BankAccount);
-        const momoAccounts = entity.filter(account => account.fiatAccountType === FiatAccountType.MobileMoney);
+        const bankAccounts = entity.filter(
+          (account) => account.fiatAccountType === FiatAccountType.BankAccount,
+        )
+        const momoAccounts = entity.filter(
+          (account) => account.fiatAccountType === FiatAccountType.MobileMoney,
+        )
 
-        const walletAccounts = entity.filter(account => account.fiatAccountType === FiatAccountType.DuniaWallet);
+        const walletAccounts = entity.filter(
+          (account) => account.fiatAccountType === FiatAccountType.DuniaWallet,
+        )
 
-        let formattedBankAccounts: any[] = [];
-        let formattedMomoAccounts: any[]= [];
-        let formattedWalletAccounts: any[]=[];
+        let formattedBankAccounts: any[] = []
+        let formattedMomoAccounts: any[] = []
+        let formattedWalletAccounts: any[] = []
 
-        bankAccounts.forEach(account => {
+        bankAccounts.forEach((account) => {
           const add = {
             fiatAccountType: account.fiatAccountType,
             fiatAccountId: account.id,
@@ -142,7 +149,7 @@ export function accountsRouter({
           formattedBankAccounts.push(add)
         })
 
-        momoAccounts.forEach(account => {
+        momoAccounts.forEach((account) => {
           const add = {
             fiatAccountType: account.fiatAccountType,
             fiatAccountId: account.id,
@@ -151,11 +158,11 @@ export function accountsRouter({
             institutionName: account.institutionName,
             operator: account?.operator,
             country: account?.country,
-            mobile: account?.mobile
+            mobile: account?.mobile,
           }
           formattedMomoAccounts.push(add)
         })
-        walletAccounts.forEach(account => {
+        walletAccounts.forEach((account) => {
           const add = {
             fiatAccountType: account.fiatAccountType,
             fiatAccountId: account.id,
@@ -164,22 +171,25 @@ export function accountsRouter({
             institutionName: account.institutionName,
             operator: account?.operator,
             country: account?.country,
-            mobile: account?.mobile
+            mobile: account?.mobile,
           }
           formattedWalletAccounts.push(add)
         })
-        let resp;
-        if(formattedBankAccounts.length === 0 && formattedWalletAccounts.length === 0 && formattedMomoAccounts.length === 0) {
-          resp = {};
+        let resp
+        if (
+          formattedBankAccounts.length === 0 &&
+          formattedWalletAccounts.length === 0 &&
+          formattedMomoAccounts.length === 0
+        ) {
+          resp = {}
         } else {
-        resp = {
-          [FiatAccountType.BankAccount]: formattedBankAccounts,
-          [FiatAccountType.MobileMoney]: formattedMomoAccounts,
-          [FiatAccountType.DuniaWallet]: formattedWalletAccounts,
+          resp = {
+            [FiatAccountType.BankAccount]: formattedBankAccounts,
+            [FiatAccountType.MobileMoney]: formattedMomoAccounts,
+            [FiatAccountType.DuniaWallet]: formattedWalletAccounts,
+          }
         }
-      }
-      return _res.status(200).send(resp)
-
+        return _res.status(200).send(resp)
       } catch (error) {
         console.log(error)
         return _res

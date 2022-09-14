@@ -1,48 +1,45 @@
 import express from 'express'
 import { asyncRoute } from './async-route'
 import { validateSchema } from '../schema/'
-import {
-  TransferRequestBody,
-  TransferStatusRequestParams,
-
-} from '../types'
+import { TransferRequestBody, TransferStatusRequestParams } from '../types'
 import { siweAuthMiddleware } from '../middleware/authenticate'
 import { Transfer } from '../entity/transfer.entity'
-import { FiatConnectError, TransferStatus, TransferType } from '@fiatconnect/fiatconnect-types'
+import {
+  FiatConnectError,
+  TransferStatus,
+  TransferType,
+} from '@fiatconnect/fiatconnect-types'
 import { ethers } from 'ethers'
 import { ensureLeading0x } from '@celo/utils/lib/address'
 
-
 import * as dotenv from 'dotenv'
-import { Quote } from '../entity/quote.entity'
-import { Repository } from 'typeorm'
-import { Account } from '../entity/account.entity'
 
 dotenv.config()
 
 /// Load private keys from environment variable
-const SENDER_PRIVATE_KEY: string = process.env.SENDER_PRIVATE_KEY !== undefined ? process.env.SENDER_PRIVATE_KEY : ''
+const SENDER_PRIVATE_KEY: string =
+  process.env.SENDER_PRIVATE_KEY !== undefined
+    ? process.env.SENDER_PRIVATE_KEY
+    : ''
 
-const RECEIVER_PRIVATE_KEY: string = process.env.RECEIVER_PRIVATE_KEY !== undefined ? process.env.RECEIVER_PRIVATE_KEY : ''
-
+const RECEIVER_PRIVATE_KEY: string =
+  process.env.RECEIVER_PRIVATE_KEY !== undefined
+    ? process.env.RECEIVER_PRIVATE_KEY
+    : ''
 
 export function transferRouter({
   clientAuthMiddleware,
   dataSource,
-  client
-
+  client,
 }: {
   clientAuthMiddleware: express.RequestHandler[]
-  dataSource: any, 
+  dataSource: any
   client: any
 }): express.Router {
   const router = express.Router()
-    // Load Repository
-    const repository: Repository<Transfer> = dataSource.getRepository(Transfer)
-    const quoteRepository: Repository<Quote> = dataSource.getRepository(Quote)
-    const accountRepository: Repository<Account> = dataSource.getRepository(Account)
-
-    const entity = new Transfer()
+  // Load Repository
+  const repository = dataSource.getRepository(Transfer)
+  const entity = new Transfer()
 
   router.use(siweAuthMiddleware)
   router.use(clientAuthMiddleware)
@@ -78,66 +75,43 @@ export function transferRouter({
         req: express.Request<{}, {}, TransferRequestBody>,
         res: express.Response,
       ) => {
-        const idempotencyKey = req.headers['idempotency-key'] as string;
-        const isValid = await validateIdempotencyKey(idempotencyKey,  client,
-          );
+        const idempotencyKey = req.headers['idempotency-key'] as string
+        const isValid = await validateIdempotencyKey(idempotencyKey, client)
         // Check if the idempotency key is already in the cache
         if (isValid) {
-        try {
+          try {
+            // Load the corresponding privateKey
+            const publicKey = new ethers.utils.SigningKey(SENDER_PRIVATE_KEY)
+              .compressedPublicKey
+            const transferAddress = ethers.utils.computeAddress(
+              ensureLeading0x(publicKey),
+            )
 
-          // Load the corresponding privateKey
-          const publicKey = new ethers.utils.SigningKey(SENDER_PRIVATE_KEY).compressedPublicKey
-          const transferAddress = ethers.utils.computeAddress(ensureLeading0x(publicKey))
-          const [account, quote] = await Promise.all([ 
-            accountRepository.findOneBy({
-            id: req.body.fiatAccountId,
-          }),
-           quoteRepository.findOneBy({
-            id: req.body.quoteId,
-          })
-        ])
-          const o = account?.fiatAccountSchema;
+            entity.quoteId = req.body.quoteId
+            entity.fiatAccountId = req.body.fiatAccountId
+            entity.status = TransferStatus.TransferStarted
+            entity.transferAddress = transferAddress
+            entity.transferType = TransferType.TransferIn
 
-          entity.quoteId = req.body.quoteId
-          entity.fiatAccountId = req.body.fiatAccountId
-          entity.status = TransferStatus.TransferStarted
-          entity.transferAddress = transferAddress
-          entity.transferType = TransferType.TransferIn
-          entity.fiatType = quote?.quote?.fiatType
-          entity.cryptoType = quote?.quote?.cryptoType
-          if(quote?.quote !== undefined){
-            entity.amountProvided = quote?.quote?.fiatAmount
-            entity.amountReceived =  quote?.quote?.cryptoAmount
+            const results = await repository.save(entity)
+            await markKeyAsUsed(idempotencyKey, client, results.id)
+
+            return res.send({
+              transferId: entity.id,
+              transferStatus: entity.status,
+              // Address from which the transfer will be sent
+              transferAddress: entity.transferAddress,
+            })
+          } catch (error: any) {
+            console.log(error)
+            console.log(error)
+            res.status(409).send({ error: FiatConnectError.ResourceExists })
           }
-          if(o !== undefined && quote?.fiatAccount !== undefined){
-            const a = quote?.fiatAccount[o];
-            entity.fee =  a!== undefined ? a?.fee : 0
-          }
-        
+        }
 
-          const results = await repository
-            .save(entity)
-          await markKeyAsUsed(idempotencyKey, client,results.id)
-
-          return res.send({   
-            transferId: entity.id,
-            transferStatus: entity.status,
-            // Address from which the transfer will be sent 
-            transferAddress: entity.transferAddress,
-          })
-        } catch (error:any) {
-        console.log(error)
-              console.log(error)
-              res
-              .status(409)
-              .send({ error: FiatConnectError.ResourceExists })
-            } 
-            
-          }
-
-          res.status(422).send({
-            error:  `Not Modified`,
-          })
+        res.status(422).send({
+          error: `Not Modified`,
+        })
       },
     ),
   )
@@ -150,75 +124,52 @@ export function transferRouter({
         req: express.Request<{}, {}, TransferRequestBody>,
         res: express.Response,
       ) => {
-        const idempotencyKey = req.headers['idempotency-key'] as string;
+        const idempotencyKey = req.headers['idempotency-key'] as string
         if (!idempotencyKey) {
           return res
-          .status(422)
-          .send({ error: FiatConnectError.InvalidParameters }) 
+            .status(422)
+            .send({ error: FiatConnectError.InvalidParameters })
+        }
 
-        } 
-
-        const isValid = await validateIdempotencyKey(idempotencyKey,  client,
-          );
+        const isValid = await validateIdempotencyKey(idempotencyKey, client)
 
         // Check if the idempotency key is already in the cache
         if (isValid) {
-       
-        try {
-          // Load the corresponding privateKey
+          try {
+            // Load the corresponding privateKey
 
-            
-          const publicKey = new ethers.utils.SigningKey(RECEIVER_PRIVATE_KEY).compressedPublicKey
-          const transferAddress = ethers.utils.computeAddress(ensureLeading0x(publicKey))
-          const [account, quote] = await Promise.all([ 
-            accountRepository.findOneBy({
-            id: req.body.fiatAccountId,
-          }),
-           quoteRepository.findOneBy({
-            id: req.body.quoteId,
-          })
-        ])
-          const o = account?.fiatAccountSchema;
+            const publicKey = new ethers.utils.SigningKey(RECEIVER_PRIVATE_KEY)
+              .compressedPublicKey
+            const transferAddress = ethers.utils.computeAddress(
+              ensureLeading0x(publicKey),
+            )
 
-          entity.quoteId = req.body.quoteId
-          entity.fiatAccountId = req.body.fiatAccountId
-          entity.status = TransferStatus.TransferStarted
-          entity.transferAddress = transferAddress
-          entity.transferType = TransferType.TransferOut
-          entity.fiatType = quote?.quote?.fiatType
-          entity.cryptoType = quote?.quote?.cryptoType
-          if(quote?.quote !== undefined){
-            entity.amountProvided = quote?.quote?.cryptoAmount
-            entity.amountReceived =  quote?.quote?.fiatAmount
-          }
-          if(o !== undefined && quote?.fiatAccount !== undefined){
-            const a = quote?.fiatAccount[o];
-            entity.fee =  a!== undefined ? a?.fee : 0
-          }
+            entity.quoteId = req.body.quoteId
+            entity.fiatAccountId = req.body.fiatAccountId
+            entity.status = TransferStatus.TransferStarted
+            entity.transferAddress = transferAddress
+            entity.transferType = TransferType.TransferOut
 
-          const results =  await repository
-            .save(entity)
+            const results = await repository.save(entity)
 
-          await markKeyAsUsed(idempotencyKey, client,results.id)
+            await markKeyAsUsed(idempotencyKey, client, results.id)
 
-          return res.send({   
-              transferId: entity.id,
+            return res.send({
+              transferId: results.id,
               transferStatus: entity.status,
+
               // Address that the user must send funds to
               transferAddress: entity.transferAddress,
             })
-        } catch (error: any) {
-              console.log(error)         
-              res
-              .status(409)
-              .send({ error: FiatConnectError.ResourceExists })
-            }       
+          } catch (error: any) {
+            console.log(error)
+            res.status(409).send({ error: FiatConnectError.ResourceExists })
           }
-          res.status(422).send({
-            error:  `Not Modified`,
-          })
+        }
+        res.status(422).send({
+          error: `Not Modified`,
+        })
       },
-      
     ),
   )
 
@@ -234,25 +185,22 @@ export function transferRouter({
           const transfer = await repository.findOneBy({
             id: req.params.transferId,
           })
-      
-          return res.send(
-            {
-              status: transfer?.status,
-              transferType: transfer?.transferType,              
-              fiatType: transfer?.fiatType,
-              cryptoType: transfer?.cryptoType,
-              amountProvided: transfer?.amountProvided,
-              amountReceived: transfer?.amountReceived,
-              fee: transfer?.fee,
-              fiatAccountId: transfer?.fiatAccountId,
-              transferId: transfer?.id,
-              transferAddress: transfer?.transferAddress,
-            }
-          )
+          return res.send({
+            status: transfer.status,
+            transferType: transfer.transferType,
+            fiatType: `FiatTypeEnum`,
+            cryptoType: `CryptoTypeEnum`,
+            amountProvided: `string`,
+            amountReceived: `string`,
+            fee: `string`,
+            fiatAccountId: transfer.fiatAccountId,
+            transferId: transfer.id,
+            transferAddress: transfer.transferAddress,
+          })
         } catch (error) {
           return res
-          .status(404)
-          .send({ error: FiatConnectError.ResourceNotFound })
+            .status(404)
+            .send({ error: FiatConnectError.ResourceNotFound })
         }
       },
     ),
@@ -260,7 +208,6 @@ export function transferRouter({
 
   return router
 }
-
 
 async function validateIdempotencyKey(_nonce: string, _redisClient: any) {
   // must validate that the IdempotencyKey hasn't already been used. If a IdempotencyKey is already used, must throw a InvalidParameters
@@ -271,23 +218,19 @@ async function validateIdempotencyKey(_nonce: string, _redisClient: any) {
     if (keyInUse) {
       return false
     }
-    return true;
+    return true
   } catch (error) {
     return false
   }
 }
 
-async function markKeyAsUsed(
-  _key: string,
-  _redisClient: any,
-  _id: string
-) {
+async function markKeyAsUsed(_key: string, _redisClient: any, _id: string) {
   // helper method for storing nonces, which can then be used by the above method.
   try {
     await _redisClient.set(_key, _id, {
       NX: true,
     })
-    return true;
+    return true
   } catch (error) {
     return false
   }

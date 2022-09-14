@@ -13,10 +13,10 @@ export class KYC {
     enum: KycSchema,
   })
   kycSchemaName?: KycSchema
-  
+
   @Column({ type: 'varchar', length: 255 })
-  owner: string;
-  
+  owner: string
+
   @Column({
     name: 'status',
     type: 'enum',

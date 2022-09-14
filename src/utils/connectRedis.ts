@@ -5,7 +5,10 @@ import * as dotenv from 'dotenv'
 dotenv.config()
 
 /// Load private keys from environment variable
-const REDIS_HOST = process.env.NODE_ENV === 'localhost' ? 'redis://localhost:6379' : process.env.REDISCLOUD_URL 
+const REDIS_HOST =
+  process.env.NODE_ENV === 'localhost'
+    ? 'redis://localhost:6379'
+    : process.env.REDISCLOUD_URL
 
 const redisClient = createClient({
   url: REDIS_HOST,

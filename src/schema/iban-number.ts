@@ -18,7 +18,7 @@ export const ibanNumberSchema: JSONSchemaType<
       type: 'string',
     },
     iban: {
-        type: 'string',
+      type: 'string',
     },
     fiatAccountType: {
       type: 'string',

@@ -62,7 +62,7 @@ export function kycRouter({
           entity.address = formattedSchema?.address
           entity.dateOfBirth = formattedSchema?.dateOfBirth
           entity.firstName = formattedSchema?.firstName
-          entity.owner =  userAddress !== undefined ? userAddress : ''
+          entity.owner = userAddress !== undefined ? userAddress : ''
           entity.lastName = formattedSchema?.lastName
           entity.middleName = formattedSchema?.middleName
           entity.phoneNumber = formattedSchema?.phoneNumber
@@ -95,14 +95,14 @@ export function kycRouter({
           // Load Repository
           const repository: Repository<KYC> = dataSource.getRepository(KYC)
           const userAddress = _req.session.siwe?.address
-          let result;
-           if(userAddress !== undefined)
+          let result
+          if (userAddress !== undefined)
             result = await repository.findOne({
               where: {
                 kycSchemaName: _req.params.kycSchema,
-                owner: userAddress
-              }}
-            )
+                owner: userAddress,
+              },
+            })
 
           return _res.send({ status: result?.status })
         } catch (error) {
@@ -123,20 +123,19 @@ export function kycRouter({
         _req: express.Request<KycRequestParams>,
         _res: express.Response,
       ) => {
-    
         try {
           // Load Repository
           const repository = dataSource.getRepository(KYC)
 
           const userAddress = _req.session.siwe?.address
-          let result;
-          if(userAddress !== undefined)
+          let result
+          if (userAddress !== undefined)
             result = await repository.findOne({
               where: {
                 kycSchemaName: _req.params.kycSchema,
-                owner: userAddress
-              }}
-            )
+                owner: userAddress,
+              },
+            })
           await repository.remove(result)
           return _res.status(200).send({})
         } catch (error) {

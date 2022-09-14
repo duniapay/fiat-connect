@@ -32,7 +32,8 @@ export function loadConfig(): Config {
   // Note that this is just one possible way of dealing with configuration/environment variables.
   // Feel free to adapt this to your needs!
   dotenv.config()
-  const DEFAULT_PORT = process.env.PORT !== undefined ? parseInt(process.env.PORT, 10) : 8080
+  const DEFAULT_PORT =
+    process.env.PORT !== undefined ? parseInt(process.env.PORT, 10) : 8080
 
   const argv = yargs
     .env('')
@@ -64,7 +65,8 @@ export function loadConfig(): Config {
       description: 'Redis server to connect',
       example: process.env.REDISCLOUD_URL,
       type: 'string',
-      default: `redis://${process.env.REDISCLOUD_URL}` || `redis://localhost:6379`,
+      default:
+        `redis://${process.env.REDISCLOUD_URL}` || `redis://localhost:6379`,
     })
     .parseSync()
 

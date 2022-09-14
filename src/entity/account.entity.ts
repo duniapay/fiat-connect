@@ -16,7 +16,7 @@ export class Account {
     name: 'operator',
     type: 'enum',
     enum: SupportedOperatorEnum,
-    nullable: true
+    nullable: true,
   })
   operator?: SupportedOperatorEnum
   @Column({ name: 'institutionName', type: 'varchar', length: 255 })
@@ -27,13 +27,18 @@ export class Account {
   mobile?: string
   @Column({ name: 'country', type: 'varchar', length: 255, nullable: true })
   country: string
-  @Column({ name: 'accountNumber', type: 'varchar', length: 255, nullable: true })
+  @Column({
+    name: 'accountNumber',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
   accountNumber?: string
   @Column({
     name: 'fiatAccountType',
     type: 'enum',
     enum: FiatAccountType,
-    nullable: true
+    nullable: true,
   })
   fiatAccountType: FiatAccountType
 
@@ -43,7 +48,7 @@ export class Account {
     name: 'fiatAccountSchema',
     type: 'enum',
     enum: FiatAccountSchema,
-    nullable: true
+    nullable: true,
   })
   fiatAccountSchema: FiatAccountSchema
 }
