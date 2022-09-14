@@ -82,7 +82,7 @@ export function transferRouter({
         req: express.Request<{}, {}, TransferRequestBody>,
         res: express.Response,
       ) => {
-        const idempotencyKey = req.headers['Idempotency-Key'] as string
+        const idempotencyKey = req.headers['idempotency-key'] as string
         const headers = req.headers
 
         console.log('headers', headers)
@@ -145,7 +145,7 @@ export function transferRouter({
         req: express.Request<{}, {}, TransferRequestBody>,
         res: express.Response,
       ) => {
-        const idempotencyKey = req.headers['Idempotency-Key'] as string
+        const idempotencyKey = req.headers['idempotency-key'] as string
         const headers = req.headers
 
         console.log('headers', headers)
