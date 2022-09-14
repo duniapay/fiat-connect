@@ -1,6 +1,6 @@
-# fiatconnect-api-starter
+# Dunia fiatconnect-api
 
-This repository contains a starter API that supports the FiatConnect standard.
+This repository contains an API that supports the FiatConnect standard.
 
 ## Usage
 
