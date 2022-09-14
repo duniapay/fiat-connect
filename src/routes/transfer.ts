@@ -83,7 +83,9 @@ export function transferRouter({
         res: express.Response,
       ) => {
         const idempotencyKey = req.headers['Idempotency-Key'] as string
-        console.log('idempotencyKey', idempotencyKey)
+        const headers = req.headers
+
+        console.log('headers', headers)
         const isValid = await validateIdempotencyKey(idempotencyKey, client)
         // Check if the idempotency key is already in the cache
         if (isValid) {
@@ -144,7 +146,9 @@ export function transferRouter({
         res: express.Response,
       ) => {
         const idempotencyKey = req.headers['Idempotency-Key'] as string
-        console.log('idempotencyKey', idempotencyKey)
+        const headers = req.headers
+
+        console.log('headers', headers)
         if (!idempotencyKey) {
           return res
             .status(422)
