@@ -82,7 +82,8 @@ export function transferRouter({
         req: express.Request<{}, {}, TransferRequestBody>,
         res: express.Response,
       ) => {
-        const idempotencyKey = req.headers['idempotency-key'] as string
+        const idempotencyKey = req.headers['Idempotency-Key'] as string
+        console.log('idempotencyKey', idempotencyKey)
         const isValid = await validateIdempotencyKey(idempotencyKey, client)
         // Check if the idempotency key is already in the cache
         if (isValid) {
@@ -127,10 +128,9 @@ export function transferRouter({
             res.status(409).send({ error: FiatConnectError.ResourceExists })
           }
         }
-
-        res.status(422).send({
-          error: `Not Modified`,
-        })
+        res.status(422).send(
+           "Unprocessable Entity",
+        )
       },
     ),
   )
@@ -143,7 +143,8 @@ export function transferRouter({
         req: express.Request<{}, {}, TransferRequestBody>,
         res: express.Response,
       ) => {
-        const idempotencyKey = req.headers['idempotency-key'] as string
+        const idempotencyKey = req.headers['Idempotency-Key'] as string
+        console.log('idempotencyKey', idempotencyKey)
         if (!idempotencyKey) {
           return res
             .status(422)
