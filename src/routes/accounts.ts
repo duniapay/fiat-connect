@@ -101,7 +101,6 @@ export function accountsRouter({
             fiatAccountSchema: req.body.fiatAccountSchema,
           })
         } catch (error) {
-          console.log(error)
           return _res
             .status(409)
             .send({ error: FiatConnectError.ResourceExists })
@@ -122,7 +121,6 @@ export function accountsRouter({
         const entity = await repository.findBy({
           owner: userAddress,
         })
-        console.log('accounts', entity)
         const bankAccounts = entity.filter(
           (account) => account.fiatAccountType === FiatAccountType.BankAccount,
         )
@@ -191,7 +189,6 @@ export function accountsRouter({
         }
         return _res.status(200).send(resp)
       } catch (error) {
-        console.log(error)
         return _res
           .status(404)
           .send({ error: FiatConnectError.ResourceNotFound })

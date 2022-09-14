@@ -16,7 +16,6 @@ async function main() {
             (message: string) => wallet.signMessage(message),
           )
           const loginResult = await fiatConnectClient.login()
-          console.log(loginResult)
 
     } catch (error) {
         console.log(error)

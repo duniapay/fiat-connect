@@ -25,8 +25,6 @@ async function main() {
   const myURL = new URL(BASE_URL)
   const hostname = myURL.hostname;
 
-  // console.log('HOSTNAME', hostname)
-  // console.log('HOST', myURL)
 
   const siweMessage = new SiweMessage({
     address: wallet.address,
@@ -42,7 +40,6 @@ async function main() {
   const message = siweMessage.prepareMessage()
   const signature = await wallet.signMessage(message)
 
-  // console.log(JSON.stringify({ message, signature }))
 
   const authResponse = await fetch(`${BASE_URL}/auth/login`, {
     method: 'POST',
@@ -59,41 +56,6 @@ async function main() {
   // set-cookie will be of the form:
   // api-starter=<cookie-val>; Path=/; Expires=Fri, 22 Apr 2022 10:36:40 GMT; HttpOnly; SameSite=Strict
   const authCookie = authResponse.headers.raw()['set-cookie'][0]
-  // console.log('cookie',authCookie.split(';')[0])
-  // console.log('cookie',authCookie.split(';')[0])
-
-  // const response = await fetch('http://localhost:8080/kyc/personalDataAndDocuments', {
-  //   headers: {
-  //     'cookie': authCookie.split(';')[0] // strip out additional fields like Path, Expires
-  //   },
-  //   method: 'POST',
-  //   body: JSON.stringify(
-  //     {
-
-  //       "lastName": "Bob",
-  //       "firstName": "Alice",
-  //       "middleName": "Foo",
-  //       "dateOfBirth": {
-  //         "day": "12",
-  //         "year": "1994",
-  //         "month": "4"
-  //       },
-  //       "address": {
-  //         "city": "Lagos",
-  //         "address1": "No 15",
-  //         "address2": "string",
-  //         "postalCode": "100001",
-  //         "isoRegionCode": "KD",
-  //         "isoCountryCode": "NG"
-  //       },
-  //       "phoneNumber": "07037205555",
-  //       "selfieDocument": "abc",
-  //       "identificationDocument": "def"
-      
-  //   })
-  // })
-  // const data = await response.json()
-  // console.log(data)
 }
 
 main()

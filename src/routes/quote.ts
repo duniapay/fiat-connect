@@ -157,7 +157,6 @@ export function quoteRouter({
           // Save quote in database
           const quoteOut = await dataSource.getRepository(Quote).create(quote)
           await dataSource.getRepository(Quote).save(quoteOut)
-          console.log('quoteOut', quoteOut)
 
           // return get quote/in response
           return _res.send({ ...quote })
@@ -247,7 +246,6 @@ export function quoteRouter({
                 },
               )
               .then((res) => {
-                console.log(res.data.data.CUSD.quote.USD.price)
                 tokenPrice = res.data.data.CUSD.quote.USD.price
               })
               .catch((err) => err)

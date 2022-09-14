@@ -54,7 +54,6 @@ export function transferRouter({
     _res: express.Response,
     next: express.NextFunction,
   ) => {
-    console.log('TransferRequestBodySchema', req.body)
     req.body = validateSchema<TransferRequestBody>(
       req.body,
       'TransferRequestBodySchema',
@@ -84,8 +83,6 @@ export function transferRouter({
       ) => {
         const idempotencyKey = req.headers['idempotency-key']?.toString()
 
-        console.log('idempotencyKey', idempotencyKey)
-
         let isKeyValid
         if (idempotencyKey) {
           isKeyValid = await validateIdempotencyKey(idempotencyKey, client)
@@ -113,13 +110,14 @@ export function transferRouter({
             const fiatAccounts = quote?.fiatAccount
             const detailledQuote: any = quote?.quote
 
-            console.log('fiatAccounts', fiatAccounts)
-            console.log('detailledQuote', detailledQuote)
-
             entity.fiatType = detailledQuote?.fiatType
             entity.cryptoType = detailledQuote?.cryptoType
             entity.amountProvided = detailledQuote?.fiatAmount.toString()
             entity.amountReceived = detailledQuote?.cryptoAmount.toString()
+
+            //TODO: GET AccountSchema
+            //TODO: GET Fee from account Map
+
             entity.fee = '0'
             const results = await repository.save(entity)
             await markKeyAsUsed(idempotencyKey, client, results.id)
@@ -131,7 +129,6 @@ export function transferRouter({
               transferAddress: entity.transferAddress,
             })
           } catch (error: any) {
-            console.log(error)
             res.status(409).send({ error: FiatConnectError.ResourceExists })
           }
         }
@@ -158,7 +155,6 @@ export function transferRouter({
       ) => {
         const idempotencyKey = req.headers['idempotency-key']?.toString()
 
-        console.log('idempotencyKey', idempotencyKey)
         if (!idempotencyKey) {
           return res.status(422).send('Unprocessable Entity')
         }
@@ -187,9 +183,6 @@ export function transferRouter({
             const fiatAccounts = quote?.fiatAccount
             const detailledQuote: any = quote?.quote
 
-            console.log('fiatAccounts', fiatAccounts)
-            console.log('detailledQuote', detailledQuote)
-
             entity.fiatType = detailledQuote?.fiatType
             entity.cryptoType = detailledQuote?.cryptoType
             entity.amountProvided = detailledQuote?.cryptoAmount.toString()
@@ -202,12 +195,10 @@ export function transferRouter({
             return res.send({
               transferId: results.id,
               transferStatus: entity.status,
-
               // Address that the user must send funds to
               transferAddress: entity.transferAddress,
             })
           } catch (error: any) {
-            console.log(error)
             res.status(409).send({ error: FiatConnectError.ResourceExists })
           }
         }
