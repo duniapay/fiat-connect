@@ -176,7 +176,8 @@ export function transferRouter({
             const fiatAccounts = quote?.fiatAccount;
             const detailledQuote = quote?.quote;
             const kyc = quote?.kyc;
-            
+            console.log('quote', quote)
+
             console.log('fiatAccounts', fiatAccounts)
             console.log('detailledQuote', detailledQuote)
             console.log('kyc', kyc)
@@ -225,11 +226,11 @@ export function transferRouter({
           return res.send({
             status: transfer.status,
             transferType: transfer.transferType,
-            fiatType: `FiatTypeEnum`,
-            cryptoType: `CryptoTypeEnum`,
-            amountProvided: `string`,
-            amountReceived: `string`,
-            fee: `string`,
+            fiatType: transfer.fiatType,
+            cryptoType: transfer.cryptoType,
+            amountProvided: transfer.amountProvided,
+            amountReceived: transfer.amountReceived,
+            fee: transfer.fee,
             fiatAccountId: transfer.fiatAccountId,
             transferId: transfer.id,
             transferAddress: transfer.transferAddress,
