@@ -63,13 +63,13 @@ export interface AuthenticationConfig {
 export enum SUPPORTED_DOMAINS {
   STAGING = 'cico-staging.dunia.africa',
   PRODUCTION = 'cico.dunia.africa',
-  DEVELOPMENT = 'localhost'
+  DEVELOPMENT = 'localhost',
 }
 
 export enum SUPPORTED_URIS {
   STAGING = 'https://cico-staging.dunia.africa/auth/login',
   PRODUCTION = 'https://cico.dunia.africa/auth/login',
-  DEVELOPMENT = 'http://localhost:5000/auth/login'
+  DEVELOPMENT = 'http://localhost:5000/auth/login',
 }
 
 export enum Network {
@@ -85,7 +85,7 @@ export class ValidationError extends Error {
   validationError: any
   constructor(msg: string, validationError: any) {
     super(msg)
-    Object.setPrototypeOf(this, new.target.prototype);
+    Object.setPrototypeOf(this, new.target.prototype)
     this.validationError = validationError
   }
 }
@@ -100,7 +100,7 @@ export class UnauthorizedError extends Error {
     msg?: string,
   ) {
     super(msg || fiatConnectError)
-    Object.setPrototypeOf(this, new.target.prototype);
+    Object.setPrototypeOf(this, new.target.prototype)
     this.fiatConnectError = fiatConnectError
   }
 }
@@ -110,7 +110,7 @@ export class InvalidSiweParamsError extends Error {
 
   constructor(fiatConnectError: FiatConnectError, msg?: string) {
     super(msg || fiatConnectError)
-    Object.setPrototypeOf(this, new.target.prototype);
+    Object.setPrototypeOf(this, new.target.prototype)
     this.fiatConnectError = fiatConnectError
   }
 }

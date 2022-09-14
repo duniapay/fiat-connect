@@ -21,15 +21,13 @@ async function validateNonce(_nonce: string, _redisClient: any) {
   // nonce is already used. If a nonce is already used, must throw a NonceInUse
   // error. e.g. `throw new InvalidSiweParamsError(FiatConnectError.NonceInUser)`
   try {
-    
     const nonceInUse = await _redisClient.get(_nonce)
     // eslint-disable-next-line no-console
     if (nonceInUse) {
       throw new InvalidSiweParamsError(FiatConnectError.NonceInUse)
     }
   } catch (error) {
-
-    throw new InvalidSiweParamsError(FiatConnectError.InvalidParameters)
+    throw new InvalidSiweParamsError(FiatConnectError.NonceInUse)
   }
 }
 
@@ -85,9 +83,7 @@ function validateIssuedAtAndExpirationTime(
   }
 }
 
-
 function validateDomainAndUri(_domain: string, _uri: string) {
-
   const isDomainValid = validateDomain(_domain)
   const isUriValid = validateURI(_uri)
   if (!isDomainValid || !isUriValid) {
@@ -97,7 +93,6 @@ function validateDomainAndUri(_domain: string, _uri: string) {
     )
   } else return true
 }
-
 
 function validateDomain(domain: string) {
   switch (domain) {
@@ -109,9 +104,8 @@ function validateDomain(domain: string) {
       return true
     default:
       return false
-  }  
+  }
 }
-
 
 function validateURI(uri: string) {
   switch (uri) {
@@ -123,7 +117,7 @@ function validateURI(uri: string) {
       return true
     default:
       return false
-  }  
+  }
 }
 
 export function authRouter({

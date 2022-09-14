@@ -1,4 +1,5 @@
 import express from 'express'
+import { Repository } from 'typeorm'
 import { asyncRoute } from './async-route'
 import { validateSchema } from '../schema/'
 import { KycRequestParams, KycSchemas, SupportedKycSchemas } from '../types'
@@ -46,6 +47,8 @@ export function kycRouter({
         >,
         _res: express.Response,
       ) => {
+        const userAddress = req.session.siwe?.address
+
         // Delegate to type-specific handlers after validation provides type guards
         const formattedSchema = validateSchema<
           KycSchemas[typeof req.params.kycSchema]
@@ -59,6 +62,7 @@ export function kycRouter({
           entity.address = formattedSchema?.address
           entity.dateOfBirth = formattedSchema?.dateOfBirth
           entity.firstName = formattedSchema?.firstName
+          entity.owner = userAddress !== undefined ? userAddress : ''
           entity.lastName = formattedSchema?.lastName
           entity.middleName = formattedSchema?.middleName
           entity.phoneNumber = formattedSchema?.phoneNumber
@@ -88,17 +92,17 @@ export function kycRouter({
         _res: express.Response,
       ) => {
         try {
-          const formattedSchema = validateSchema<
-            KycSchemas[typeof _req.params.kycSchema]
-          >(_req.body, `${_req.params.kycSchema}KycSchema`)
           // Load Repository
-          const repository = dataSource.getRepository(KYC)
-
-          const result = await repository.findOneBy({
-            firstName: formattedSchema.firstName,
-            lastName: formattedSchema.lastName,
-            dateOfBirth: formattedSchema.dateOfBirth,
-          })
+          const repository: Repository<KYC> = dataSource.getRepository(KYC)
+          const userAddress = _req.session.siwe?.address
+          let result
+          if (userAddress !== undefined)
+            result = await repository.findOne({
+              where: {
+                kycSchemaName: _req.params.kycSchema,
+                owner: userAddress,
+              },
+            })
 
           return _res.send({ status: result?.status })
         } catch (error) {
@@ -118,20 +122,21 @@ export function kycRouter({
         _req: express.Request<KycRequestParams>,
         _res: express.Response,
       ) => {
-        const formattedSchema = validateSchema<
-          KycSchemas[typeof _req.params.kycSchema]
-        >(_req.body, `${_req.params.kycSchema}KycSchema`)
         try {
           // Load Repository
           const repository = dataSource.getRepository(KYC)
 
-          const toRemove = await repository.findOneBy({
-            firstName: formattedSchema.firstName,
-            lastName: formattedSchema.lastName,
-            dateOfBirth: formattedSchema.dateOfBirth,
-          })
-
-          await repository.remove(toRemove)
+          const userAddress = _req.session.siwe?.address
+          let result
+          if (userAddress !== undefined)
+            result = await repository.findOne({
+              where: {
+                kycSchemaName: _req.params.kycSchema,
+                owner: userAddress,
+              },
+            })
+          await repository.remove(result)
+          return _res.status(200).send({})
         } catch (error) {
           return _res
             .status(404)

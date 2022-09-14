@@ -4,9 +4,9 @@ import {
   PostFiatAccountRequestBody,
   SupportedFiatAccountSchemas,
 } from '../types'
-import { accountNumberSchema } from './account-number'
 import { duniaWalletSchema } from './dunia-wallet'
 import { mobileMoneySchema } from './mobile-money'
+import { accountNumberSchema } from './account-number'
 
 export const postFiatAccountRequestBodySchema: JSONSchemaType<
   PostFiatAccountRequestBody<SupportedFiatAccountSchemas>

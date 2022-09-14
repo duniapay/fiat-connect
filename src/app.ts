@@ -50,7 +50,10 @@ export function initApp({
   app.use('/quote', quoteRouter({ clientAuthMiddleware, client, dataSource }))
   app.use('/kyc', kycRouter({ clientAuthMiddleware, dataSource }))
   app.use('/accounts', accountsRouter({ clientAuthMiddleware, dataSource }))
-  app.use('/transfer', transferRouter({ clientAuthMiddleware, dataSource, client }))
+  app.use(
+    '/transfer',
+    transferRouter({ clientAuthMiddleware, dataSource, client }),
+  )
 
   app.use(errorToStatusCode)
   return app

@@ -10,8 +10,11 @@ import {
 import { siweAuthMiddleware } from '../middleware/authenticate'
 import { Account } from '../entity/account.entity'
 import {
-  FiatConnectError
+  FiatAccountSchema,
+  FiatAccountType,
+  FiatConnectError,
 } from '@fiatconnect/fiatconnect-types'
+import { FindOptionsWhere, Repository } from 'typeorm'
 
 export function accountsRouter({
   clientAuthMiddleware,
@@ -80,7 +83,9 @@ export function accountsRouter({
         const entity = new Account()
         entity.institutionName = validatedData.institutionName
         entity.accountName = validatedData?.accountName
+        entity.fiatAccountType = validatedData?.fiatAccountType
         entity.owner = userAddress
+        entity.fiatAccountSchema = req.body.fiatAccountSchema
         /// TODO: Generate entity based on validatedData type
 
         try {
@@ -93,7 +98,7 @@ export function accountsRouter({
             accountName: entity.accountName,
             institutionName: entity.institutionName,
             fiatAccountType: entity.fiatAccountType,
-            fiatAccountSchema: `${req.body.fiatAccountSchema}Schema`,
+            fiatAccountSchema: req.body.fiatAccountSchema,
           })
         } catch (error) {
           return _res
@@ -110,11 +115,79 @@ export function accountsRouter({
       try {
         const userAddress = _req.session.siwe?.address
         // Load Repository
-        const repository = dataSource.getRepository(Account)
-        const transfer = await repository.findBy({
+        const repository: Repository<Account> =
+          dataSource.getRepository(Account)
+
+        const entity = await repository.findBy({
           owner: userAddress,
         })
-        return _res.send(transfer)
+        const bankAccounts = entity.filter(
+          (account) => account.fiatAccountType === FiatAccountType.BankAccount,
+        )
+        const momoAccounts = entity.filter(
+          (account) => account.fiatAccountType === FiatAccountType.MobileMoney,
+        )
+
+        const walletAccounts = entity.filter(
+          (account) => account.fiatAccountType === FiatAccountType.DuniaWallet,
+        )
+
+        let formattedBankAccounts: any[] = []
+        let formattedMomoAccounts: any[] = []
+        let formattedWalletAccounts: any[] = []
+
+        bankAccounts.forEach((account) => {
+          const add = {
+            fiatAccountType: account.fiatAccountType,
+            fiatAccountId: account.id,
+            fiatAccountSchema: account.fiatAccountSchema,
+            accountName: account.accountName,
+            institutionName: account.institutionName,
+          }
+          formattedBankAccounts.push(add)
+        })
+
+        momoAccounts.forEach((account) => {
+          const add = {
+            fiatAccountType: account.fiatAccountType,
+            fiatAccountId: account.id,
+            fiatAccountSchema: account.fiatAccountSchema,
+            accountName: account.accountName,
+            institutionName: account.institutionName,
+            operator: account?.operator,
+            country: account?.country,
+            mobile: account?.mobile,
+          }
+          formattedMomoAccounts.push(add)
+        })
+        walletAccounts.forEach((account) => {
+          const add = {
+            fiatAccountType: account.fiatAccountType,
+            fiatAccountId: account.id,
+            fiatAccountSchema: account.fiatAccountSchema,
+            accountName: account.accountName,
+            institutionName: account.institutionName,
+            operator: account?.operator,
+            country: account?.country,
+            mobile: account?.mobile,
+          }
+          formattedWalletAccounts.push(add)
+        })
+        let resp
+        if (
+          formattedBankAccounts.length === 0 &&
+          formattedWalletAccounts.length === 0 &&
+          formattedMomoAccounts.length === 0
+        ) {
+          resp = {}
+        } else {
+          resp = {
+            [FiatAccountType.BankAccount]: formattedBankAccounts,
+            [FiatAccountType.MobileMoney]: formattedMomoAccounts,
+            [FiatAccountType.DuniaWallet]: formattedWalletAccounts,
+          }
+        }
+        return _res.status(200).send(resp)
       } catch (error) {
         return _res
           .status(404)
@@ -143,6 +216,7 @@ export function accountsRouter({
           })
 
           await repository.remove(toRemove)
+          return _res.status(200).send({})
         } catch (error) {
           return _res
             .status(404)

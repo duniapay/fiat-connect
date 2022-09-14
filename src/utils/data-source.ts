@@ -4,7 +4,10 @@ import * as dotenv from 'dotenv'
 
 dotenv.config()
 
-const DATABASE_PORT = process.env.DATABASE_PORT !== undefined ? parseInt(process.env.DATABASE_PORT, 10) : 8080
+const DATABASE_PORT =
+  process.env.DATABASE_PORT !== undefined
+    ? parseInt(process.env.DATABASE_PORT, 10)
+    : 8080
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -12,15 +15,16 @@ export const AppDataSource = new DataSource({
   username: process.env.DATABASE_USERNAME,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
-  synchronize: false,
+  synchronize: true,
   logging: false,
+  dropSchema: true,
   entities: ['src/entity/*.ts'],
   migrations: [],
   subscribers: [],
   ssl: true,
   extra: {
     ssl: {
-      rejectUnauthorized: false
-    }
-  }
+      rejectUnauthorized: false,
+    },
+  },
 })

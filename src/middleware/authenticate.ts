@@ -8,10 +8,6 @@ import {
   UnauthorizedError,
 } from '../types'
 
-
-
-
-
 dotenv.config()
 
 /// TODO: get api key from configuration
@@ -59,13 +55,12 @@ export function siweAuthMiddleware(
   _res: express.Response,
   next: express.NextFunction,
 ) {
-  
   if (!req.session.siwe) {
     throw new UnauthorizedError()
   }
-  const expirationDate = req.session.siwe?.expirationTime;
+  const expirationDate = req.session.siwe?.expirationTime
 
-  if(expirationDate)
+  if (expirationDate)
     if (new Date() > new Date(expirationDate)) {
       throw new UnauthorizedError(FiatConnectError.SessionExpired)
     }

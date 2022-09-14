@@ -5,7 +5,7 @@ import { validateSchema } from '../schema/'
 import { QuoteRequestBody } from '../types'
 import { Quote } from '../entity/quote.entity'
 import axios, { AxiosRequestHeaders } from 'axios'
-import { v4 as uuidv4 } from 'uuid'
+import { v4 as uuidv4, v4 } from 'uuid'
 
 import {
   CryptoType,
@@ -28,9 +28,6 @@ const MAX_CRYPTO_AMOUNT = 10
 
 const USD_XOF_RATE = 650
 
-
-
-
 export function quoteRouter({
   clientAuthMiddleware,
   client,
@@ -42,7 +39,6 @@ export function quoteRouter({
 }): express.Router {
   const router = express.Router()
   router.use(clientAuthMiddleware)
-  const quoteId = uuidv4()
 
   router.use(
     (
@@ -82,6 +78,7 @@ export function quoteRouter({
           isValidAmount(_req.body)
           // Create new Quote Entity
           const quote = new Quote()
+          quote.id = v4()
 
           let tokenPrice = 0
 
@@ -103,10 +100,10 @@ export function quoteRouter({
                 tokenPrice = res.data.data.CUSD.quote.USD.price
               })
               .catch((err) => err)
-            // Estimate fiat amount
+          // Estimate fiat amount
           const fiatAmount =
             Number(_req.body.cryptoAmount) * Number(tokenPrice) * USD_XOF_RATE
-                        // Estimate crypto amount
+          // Estimate crypto amount
 
           const cryptoAmount = Number(_req.body.fiatAmount) / USD_XOF_RATE
           // Set quote validity
@@ -123,7 +120,7 @@ export function quoteRouter({
               ? cryptoAmount
               : _req.body.cryptoAmount,
             guaranteedUntil: guaranteedUntil,
-            quoteId: quoteId,
+            quoteId: quote.id,
             transferType: TransferType.TransferIn,
           }
           ;(quote.kyc = {
@@ -157,12 +154,12 @@ export function quoteRouter({
               },
             })
 
-            // Save quote in database
+          // Save quote in database
           const quoteOut = await dataSource.getRepository(Quote).create(quote)
           await dataSource.getRepository(Quote).save(quoteOut)
 
           // return get quote/in response
-          return _res.send({ quoteOut })
+          return _res.send({ ...quote })
         } catch (error: any) {
           switch (error.message) {
             case FiatConnectError.CryptoNotSupported:
@@ -233,6 +230,7 @@ export function quoteRouter({
           isSupportedCrypto(_req.body)
           isValidAmount(_req.body)
           const quote = new Quote()
+          quote.id = v4()
 
           let tokenPrice = 0
           if (_req.body.cryptoAmount && COINMARKETCAP_KEY)
@@ -248,7 +246,6 @@ export function quoteRouter({
                 },
               )
               .then((res) => {
-                console.log(res.data.data.CUSD.quote.USD.price)
                 tokenPrice = res.data.data.CUSD.quote.USD.price
               })
               .catch((err) => err)
@@ -268,7 +265,7 @@ export function quoteRouter({
               ? cryptoAmount
               : _req.body.cryptoAmount,
             guaranteedUntil: guaranteedUntil,
-            quoteId: quoteId,
+            quoteId: quote.id,
             transferType: TransferType.TransferIn,
           }
           quote.kyc = {
@@ -313,7 +310,7 @@ export function quoteRouter({
           }
           const quoteOut = await dataSource.getRepository(Quote).create(quote)
           await dataSource.getRepository(Quote).save(quoteOut)
-          return _res.send({ quoteOut })
+          return _res.send({ ...quote })
         } catch (error: any) {
           switch (error.message) {
             case FiatConnectError.CryptoNotSupported:
@@ -402,7 +399,6 @@ function isValidAmount(body: QuoteRequestBody) {
     }
   }
 }
-
 
 function isSupportedGeo(
   country: string,

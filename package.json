@@ -1,7 +1,7 @@
 {
    "name": "fiatconnect-api",
    "version": "0.0.1",
-   "description": "An example implementation of a FiatConnect-compliant API",
+   "description": "DUNIA PAYMENT implementation of FiatConnect API",
    "main": "index.js",
    "engines": {
       "node": "^16"
@@ -20,7 +20,7 @@
    "license": "MIT",
    "dependencies": {
       "@celo/utils": "^1.5.2",
-      "@fiatconnect/fiatconnect-types": "^6.1.0",
+      "@fiatconnect/fiatconnect-types": "^7.0.3",
       "@types/express": "^4.17.13",
       "@types/node": "^17.0.21",
       "@types/yargs": "^17.0.10",
@@ -42,6 +42,7 @@
       "express": "^4.17.2",
       "express-idempotency": "^1.0.5",
       "express-session": "^1.17.3",
+      "@fiatconnect/fiatconnect-sdk": "^0.3.8",
       "pg": "^8.4.0",
       "prettier": "^2.7.1",
       "redis": "^4.2.0",
