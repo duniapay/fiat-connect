@@ -20,6 +20,7 @@
    "license": "MIT",
    "dependencies": {
       "@celo/utils": "^1.5.2",
+      "@fiatconnect/fiatconnect-sdk": "^0.3.8",
       "@fiatconnect/fiatconnect-types": "^7.0.3",
       "@types/express": "^4.17.13",
       "@types/node": "^17.0.21",
@@ -42,7 +43,6 @@
       "express": "^4.17.2",
       "express-idempotency": "^1.0.5",
       "express-session": "^1.17.3",
-      "@fiatconnect/fiatconnect-sdk": "^0.3.8",
       "pg": "^8.4.0",
       "prettier": "^2.7.1",
       "redis": "^4.2.0",
@@ -65,6 +65,7 @@
       "@typescript-eslint/eslint-plugin": "^5.29.0",
       "@valora/eslint-config-typescript": "^1.0.0",
       "@valora/prettier-config": "^0.0.1",
+      "danger": "^11.1.2",
       "eslint": "^8.18.0",
       "eslint-plugin-chai-expect": "^3.0.0",
       "jest": "^27.5.1",
