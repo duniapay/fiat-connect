@@ -1,7 +1,7 @@
 {
    "name": "fiatconnect-api",
    "version": "0.0.1",
-   "description": "An example implementation of a FiatConnect-compliant API",
+   "description": "DUNIA PAYMENT implementation of FiatConnect API",
    "main": "index.js",
    "engines": {
       "node": "^16"

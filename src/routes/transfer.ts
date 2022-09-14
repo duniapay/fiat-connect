@@ -5,7 +5,9 @@ import { TransferRequestBody, TransferStatusRequestParams } from '../types'
 import { siweAuthMiddleware } from '../middleware/authenticate'
 import { Transfer } from '../entity/transfer.entity'
 import {
+  CryptoType,
   FiatConnectError,
+  FiatType,
   TransferStatus,
   TransferType,
 } from '@fiatconnect/fiatconnect-types'
@@ -13,6 +15,7 @@ import { ethers } from 'ethers'
 import { ensureLeading0x } from '@celo/utils/lib/address'
 
 import * as dotenv from 'dotenv'
+import { Quote } from '../entity/quote.entity'
 
 dotenv.config()
 
@@ -39,6 +42,8 @@ export function transferRouter({
   const router = express.Router()
   // Load Repository
   const repository = dataSource.getRepository(Transfer)
+  const quoteRepository = dataSource.getRepository(Quote)
+
   const entity = new Transfer()
 
   router.use(siweAuthMiddleware)
@@ -92,7 +97,22 @@ export function transferRouter({
             entity.status = TransferStatus.TransferStarted
             entity.transferAddress = transferAddress
             entity.transferType = TransferType.TransferIn
+            const quote: Quote = await quoteRepository.findOneBy({
+              id: req.body.quoteId,
+            })
+            const fiatAccounts = quote.fiatAccount;
+            const detailledQuote = quote.quote;
+            const kyc = quote.kyc;
 
+            console.log('fiatAccounts', fiatAccounts)
+            console.log('detailledQuote', detailledQuote)
+            console.log('kyc', kyc)
+
+            entity.fiatType = FiatType.XOF;
+            entity.cryptoType= CryptoType.cUSD;
+            entity.amountProvided= 0;
+            entity.amountReceived= 0;
+            entity.fee= 0;
             const results = await repository.save(entity)
             await markKeyAsUsed(idempotencyKey, client, results.id)
 
@@ -149,7 +169,22 @@ export function transferRouter({
             entity.status = TransferStatus.TransferStarted
             entity.transferAddress = transferAddress
             entity.transferType = TransferType.TransferOut
+            const quote: Quote = await quoteRepository.findOneBy({
+              id: req.body.quoteId,
+            })
+            const fiatAccounts = quote.fiatAccount;
+            const detailledQuote = quote.quote;
+            const kyc = quote.kyc;
+            
+            console.log('fiatAccounts', fiatAccounts)
+            console.log('detailledQuote', detailledQuote)
+            console.log('kyc', kyc)
 
+            entity.fiatType = FiatType.XOF;
+            entity.cryptoType= CryptoType.cUSD;
+            entity.amountProvided= 0;
+            entity.amountReceived= 0;
+            entity.fee= 0;
             const results = await repository.save(entity)
 
             await markKeyAsUsed(idempotencyKey, client, results.id)
@@ -185,6 +220,7 @@ export function transferRouter({
           const transfer = await repository.findOneBy({
             id: req.params.transferId,
           })
+          
           return res.send({
             status: transfer.status,
             transferType: transfer.transferType,
