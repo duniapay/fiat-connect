@@ -8,7 +8,6 @@
   },
   "scripts": {
     "build": "rimraf dist && tsc",
-    "postinstall": "npm run build",
     "format": "prettier --loglevel error --write \"./src/**/*.ts\"",
     "lint": "eslint --ext=.tsx,.ts --fix src/",
     "dev": "./scripts/dev.sh",
