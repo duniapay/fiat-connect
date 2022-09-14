@@ -101,7 +101,7 @@ export function transferRouter({
             const transferAddress = ethers.utils.computeAddress(
               ensureLeading0x(publicKey),
             )
-
+            entity.id = idempotencyKey
             entity.quoteId = req.body.quoteId
             entity.fiatAccountId = req.body.fiatAccountId
             entity.status = TransferStatus.TransferStarted
@@ -135,7 +135,15 @@ export function transferRouter({
             res.status(409).send({ error: FiatConnectError.ResourceExists })
           }
         }
-        res.status(422).send('Unprocessable Entity')
+        const transfer = await repository.findOneBy({
+          id: idempotencyKey,
+        })
+        return res.send({
+          transferId: transfer.id,
+          transferStatus: transfer.status,
+          // Address that the user must send funds to
+          transferAddress: transfer.transferAddress,
+        })
       },
     ),
   )
@@ -167,7 +175,7 @@ export function transferRouter({
             const transferAddress = ethers.utils.computeAddress(
               ensureLeading0x(publicKey),
             )
-
+            entity.id = idempotencyKey
             entity.quoteId = req.body.quoteId
             entity.fiatAccountId = req.body.fiatAccountId
             entity.status = TransferStatus.TransferStarted
@@ -203,8 +211,14 @@ export function transferRouter({
             res.status(409).send({ error: FiatConnectError.ResourceExists })
           }
         }
-        res.status(422).send({
-          error: `Not Modified`,
+        const transfer = await repository.findOneBy({
+          id: idempotencyKey,
+        })
+        return res.send({
+          transferId: transfer.id,
+          transferStatus: transfer.status,
+          // Address that the user must send funds to
+          transferAddress: transfer.transferAddress,
         })
       },
     ),
