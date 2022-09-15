@@ -12,7 +12,9 @@
     "lint": "eslint --ext=.tsx,.ts --fix src/",
     "dev": "./scripts/dev.sh",
     "start": "./scripts/start.sh",
-    "test": "jest",
+    "test": "jest ",
+    "tests:unit": "jest --config=jest.config.js",
+    "tests:e2e": "jest --config=jest-e2e.config.js",
     "dev:server": "NODE_ENV=localhost nodemon --watch './**/*.ts' --exec 'ts-node' --files ./src/index.ts --auth-config-option alfajores --session-secret poiii",
     "typeorm": "typeorm-ts-node-commonjs"
   },

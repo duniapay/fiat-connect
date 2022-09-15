@@ -4,7 +4,7 @@ module.exports = {
   transform: {
     '^.+\\.(ts)$': 'ts-jest',
   },
-  testRegex: '.test.ts$',
+  testRegex: '.e2e-spec.ts$',
   testPathIgnorePatterns: ['dist'],
   globals: {
     'ts-jest': {
