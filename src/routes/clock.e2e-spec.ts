@@ -1,9 +1,9 @@
 import axios from 'axios'
 import { expect, use } from 'chai'
-import { FIFTEEN_MINUTES_IN_MS } from '../../src/constants'
+import { FIFTEEN_MINUTES_IN_MS } from '../constants'
 import path from 'path'
 import { chaiPlugin } from 'api-contract-validator'
-import { checkResponseSchema } from '../../src/check-response-schema'
+import { checkResponseSchema } from '../check-response-schema'
 import { loadConfig } from '../config'
 
 const { openapiSpec } = loadConfig()

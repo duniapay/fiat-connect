@@ -3,8 +3,8 @@ import { expect, use } from 'chai'
 import path from 'path'
 
 import axios, { AxiosRequestHeaders } from 'axios'
-import { checkResponseSchema } from '../../src/check-response-schema'
-import { MOCK_QUOTE } from '../../src/mock-data/quote'
+import { checkResponseSchema } from '../check-response-schema'
+import { MOCK_QUOTE } from '../mock-data/quote'
 import { ethers } from 'ethers'
 import { loadConfig } from '../config'
 
