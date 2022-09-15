@@ -4,6 +4,13 @@ module.exports = {
   transform: {
     '^.+\\.(ts)$': 'ts-jest',
   },
+  collectCoverage: true,
+  collectCoverageFrom: ['./src/routes/**'],
+  coverageThreshold: {
+    global: {
+      lines: 90,
+    },
+  },
   testRegex: '.test.ts$',
   testPathIgnorePatterns: ['dist'],
   globals: {
