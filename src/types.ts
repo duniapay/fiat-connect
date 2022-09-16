@@ -46,6 +46,8 @@ export interface Config {
   port: number
   sessionSecret: string
   openapiSpec: string
+  coinMarketCapKey: string
+  coinMarketCapUrl: string
 }
 
 export enum ClientAuthStrategy {

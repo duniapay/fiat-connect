@@ -1,5 +1,5 @@
 import express from 'express'
-import * as dotenv from 'dotenv'
+import { EXPECTED_API_KEY } from '../constants'
 
 import {
   AuthenticationConfig,
@@ -7,12 +7,6 @@ import {
   FiatConnectError,
   UnauthorizedError,
 } from '../types'
-
-dotenv.config()
-
-/// TODO: get api key from configuration
-const EXPECTED_API_KEY = process.env.API_KEY
-export const COINMARKETCAP_KEY = process.env.COINMARKETCAP_KEY
 
 function doNothingMiddleware(
   _req: express.Request,
