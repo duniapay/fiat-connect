@@ -11,21 +11,20 @@ const DATABASE_PORT =
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
-  // url: process.env.DATABASE_URL,
-  host: 'localhost',
-  username: 'postgres',
-  password: 'admin',
-  database: 'postgres',
+  url: process.env.DATABASE_URL,
+  username: process.env.DATABASE_USERNAME,
+  password: process.env.DATABASE_PASSWORD,
+  database: process.env.DATABASE_NAME,
   synchronize: true,
   logging: false,
   dropSchema: true,
   entities: ['src/entity/*.ts'],
   migrations: [],
   subscribers: [],
-  ssl: false,
-  // extra: {
-  //   ssl: {
-  //     rejectUnauthorized: false,
-  //   },
-  // },
+  ssl: true,
+  extra: {
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  },
 })
