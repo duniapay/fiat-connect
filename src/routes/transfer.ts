@@ -20,7 +20,7 @@ import { Repository } from 'typeorm'
 
 dotenv.config()
 
-/// Load private keys from environment variable
+/// Load private keys from environment
 const SENDER_PRIVATE_KEY: string =
   process.env.SENDER_PRIVATE_KEY !== undefined
     ? process.env.SENDER_PRIVATE_KEY
@@ -101,12 +101,12 @@ export function transferRouter({
             entity.id = idempotencyKey
             entity.quoteId = req.body.quoteId
             entity.fiatAccountId = req.body.fiatAccountId
-            entity.status = TransferStatus.TransferStarted
             entity.transferAddress = transferAddress
             entity.transferType = TransferType.TransferIn
             const quote = await quoteRepository.findOneBy({
               id: req.body.quoteId,
             })
+            //TODO: GET AccountSchema
             const fiatAccounts = quote?.fiatAccount
             const detailledQuote: any = quote?.quote
 
@@ -115,7 +115,13 @@ export function transferRouter({
             entity.amountProvided = detailledQuote?.fiatAmount.toString()
             entity.amountReceived = detailledQuote?.cryptoAmount.toString()
 
-            //TODO: GET AccountSchema
+            /// Verify quote validity
+            const isValidUntil: Date = detailledQuote?.guaranteedUntil
+            if (Date.now() > isValidUntil.getTime()) {
+              entity.status = TransferStatus.TransferFailed
+            }
+            entity.status = TransferStatus.TransferStarted
+
             //TODO: GET Fee from account Map
 
             entity.fee = '0'
@@ -174,7 +180,6 @@ export function transferRouter({
             entity.id = idempotencyKey
             entity.quoteId = req.body.quoteId
             entity.fiatAccountId = req.body.fiatAccountId
-            entity.status = TransferStatus.TransferStarted
             entity.transferAddress = transferAddress
             entity.transferType = TransferType.TransferOut
             const quote = await quoteRepository.findOneBy({
@@ -188,6 +193,14 @@ export function transferRouter({
             entity.amountProvided = detailledQuote?.cryptoAmount.toString()
             entity.amountReceived = detailledQuote?.fiatAmount.toString()
             entity.fee = '0'
+
+            /// Verify quote validity
+            const isValidUntil: Date = detailledQuote?.guaranteedUntil
+            if (Date.now() > isValidUntil.getTime()) {
+              entity.status = TransferStatus.TransferFailed
+            }
+            entity.status = TransferStatus.TransferStarted
+
             const results = await repository.save(entity)
 
             await markKeyAsUsed(idempotencyKey, client, results.id)
