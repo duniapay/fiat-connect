@@ -56,6 +56,18 @@ export function loadConfig(): Config {
       example: OPENAPI_SPEC,
       default: OPENAPI_SPEC,
     })
+    .option('coin_market_cap_key', {
+      description: '',
+      type: 'string',
+      example: '8e434527-ebeb-4233-98ba-1da2a675ebc5',
+      default: process.env.COIN_MARKET_CAP_KEY,
+    })
+    .option('coin_market_cap_url', {
+      description: '',
+      type: 'string',
+      example: 'https://sandbox-api.coinmarketcap.com/v1',
+      default: process.env.COIN_MARKET_CAP_BASE_URL,
+    })
     .option('session-secret', {
       description: 'The secret for signing the session',
       type: 'string',
@@ -75,5 +87,7 @@ export function loadConfig(): Config {
     port: argv.port,
     sessionSecret: argv.sessionSecret,
     openapiSpec: argv.openapiSpec,
+    coinMarketCapKey: argv.coin_market_cap_key!,
+    coinMarketCapUrl: argv.coin_market_cap_url!,
   }
 }

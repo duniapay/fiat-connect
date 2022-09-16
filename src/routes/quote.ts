@@ -1,4 +1,9 @@
 /* eslint-disable no-console */
+
+import * as dotenv from 'dotenv'
+
+dotenv.config()
+
 import express from 'express'
 import { asyncRoute } from './async-route'
 import { validateSchema } from '../schema/'
@@ -17,7 +22,9 @@ import {
   KycSchema,
   TransferType,
 } from '@fiatconnect/fiatconnect-types'
-import { COINMARKETCAP_KEY } from '../middleware/authenticate'
+import { loadConfig } from '../config'
+
+const { coinMarketCapKey, coinMarketCapUrl } = loadConfig()
 
 const MIN_FIAT_AMOUNT = 1000
 const MAX_FIAT_AMOUNT = 10000
@@ -80,26 +87,11 @@ export function quoteRouter({
           const quote = new Quote()
           quote.id = v4()
 
-          let tokenPrice = 0
-
           // Get live rates from CoinmarketCap API
-          if (_req.body.cryptoAmount && COINMARKETCAP_KEY)
-            await axios
-              .get(
-                'https://sandbox-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest',
-                {
-                  headers: {
-                    'X-CMC_PRO_API_KEY': COINMARKETCAP_KEY,
-                  },
-                  params: { symbol: _req.body.cryptoType },
-                  // eslint-disable-next-line no-console
-                },
-              )
-              .then((res) => {
-                // Set token price from CoinmarketCap API
-                tokenPrice = res.data.data.CUSD.quote.USD.price
-              })
-              .catch((err) => err)
+          const rates = await requestRate(_req.body.cryptoType)
+          const tokenPrice =
+            rates[_req.body.cryptoType.toUpperCase()].quote.USD?.price
+
           // Estimate fiat amount
           const fiatAmount =
             Number(_req.body.cryptoAmount) * Number(tokenPrice) * USD_XOF_RATE
@@ -123,36 +115,37 @@ export function quoteRouter({
             quoteId: quote.id,
             transferType: TransferType.TransferIn,
           }
-          ;(quote.kyc = {
+
+          quote.kyc = {
             kycRequired: true,
             kycSchemas: [
               {
                 kycSchema: KycSchema.PersonalDataAndDocuments,
               },
             ],
-          }),
-            (quote.fiatAccount = {
-              [FiatAccountSchema.MobileMoney]: {
-                fiatAccountSchemas: [
-                  {
-                    fiatAccountSchema: FiatAccountSchema.MobileMoney,
-                  },
-                ],
-                fee: 0.025,
-                feeType: FeeType.PlatformFee,
-                feeFrequency: FeeFrequency.OneTime,
-              },
-              [FiatAccountSchema.DuniaWallet]: {
-                fiatAccountSchemas: [
-                  {
-                    fiatAccountSchema: FiatAccountSchema.DuniaWallet,
-                  },
-                ],
-                fee: 0.5,
-                feeType: FeeType.PlatformFee,
-                feeFrequency: FeeFrequency.OneTime,
-              },
-            })
+          }
+          quote.fiatAccount = {
+            [FiatAccountSchema.MobileMoney]: {
+              fiatAccountSchemas: [
+                {
+                  fiatAccountSchema: FiatAccountSchema.MobileMoney,
+                },
+              ],
+              fee: 0.025,
+              feeType: FeeType.PlatformFee,
+              feeFrequency: FeeFrequency.OneTime,
+            },
+            [FiatAccountSchema.DuniaWallet]: {
+              fiatAccountSchemas: [
+                {
+                  fiatAccountSchema: FiatAccountSchema.DuniaWallet,
+                },
+              ],
+              fee: 0.5,
+              feeType: FeeType.PlatformFee,
+              feeFrequency: FeeFrequency.OneTime,
+            },
+          }
 
           // Save quote in database
           const quoteOut = await dataSource.getRepository(Quote).create(quote)
@@ -233,22 +226,11 @@ export function quoteRouter({
           quote.id = v4()
 
           let tokenPrice = 0
-          if (_req.body.cryptoAmount && COINMARKETCAP_KEY)
-            await axios
-              .get(
-                'https://sandbox-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest',
-                {
-                  headers: {
-                    'X-CMC_PRO_API_KEY': COINMARKETCAP_KEY.toString(),
-                  },
-                  params: { symbol: _req.body.cryptoType },
-                  // eslint-disable-next-line no-console
-                },
-              )
-              .then((res) => {
-                tokenPrice = res.data.data.CUSD.quote.USD.price
-              })
-              .catch((err) => err)
+          let rates
+          if (_req.body.cryptoAmount)
+            rates = await requestRate(_req.body.cryptoType)
+          tokenPrice =
+            rates[_req.body.cryptoType.toUpperCase()].quote.USD?.price
 
           const fiatAmount =
             Number(_req.body.cryptoAmount) * Number(tokenPrice) * USD_XOF_RATE
@@ -359,7 +341,6 @@ export function quoteRouter({
       },
     ),
   )
-
   return router
 }
 
@@ -430,4 +411,17 @@ function isSupportedGeo(
     default:
       break
   }
+}
+
+export async function requestRate(params: CryptoType) {
+  const d = await axios.get(
+    `${coinMarketCapUrl}/cryptocurrency/quotes/latest`,
+    {
+      headers: {
+        'X-CMC_PRO_API_KEY': coinMarketCapKey,
+      },
+      params: { symbol: params },
+    },
+  )
+  return d.data?.data
 }
