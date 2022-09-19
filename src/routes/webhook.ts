@@ -2,9 +2,10 @@
 import axios from 'axios'
 import * as dotenv from 'dotenv'
 import express from 'express'
+import createHmac from 'express'
+
 import { asyncRoute } from './async-route'
 
-const crypto = require('crypto');
 
 dotenv.config()
 
@@ -22,7 +23,7 @@ export function webhookRouter({
     const router = express.Router()
     router.use(clientAuthMiddleware)
     router.post(
-        '/webhook',
+        '/',
         asyncRoute(
           async (
             _req: express.Request,
@@ -34,7 +35,7 @@ export function webhookRouter({
 
             const webhook_payload = _req.body
 
-            const hmac = crypto.createHmac('sha1', WEBHOOK_SECRET)
+            const hmac = createHmac('sha1', WEBHOOK_SECRET)
 
             const webhookDigest = hmac.update(webhook_payload).digest('hex')
             const t = Date.now();
