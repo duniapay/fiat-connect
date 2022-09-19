@@ -5,9 +5,7 @@ import { TransferRequestBody, TransferStatusRequestParams } from '../types'
 import { siweAuthMiddleware } from '../middleware/authenticate'
 import { Transfer } from '../entity/transfer.entity'
 import {
-  CryptoType,
   FiatConnectError,
-  FiatType,
   TransferStatus,
   TransferType,
 } from '@fiatconnect/fiatconnect-types'
@@ -114,7 +112,7 @@ export function transferRouter({
             entity.cryptoType = detailledQuote?.cryptoType
             entity.amountProvided = detailledQuote?.fiatAmount.toString()
             entity.amountReceived = detailledQuote?.cryptoAmount.toString()
-
+            console.log('fiatAccounts', fiatAccounts)
             /// Verify quote validity
             const isValidUntil: Date = detailledQuote?.guaranteedUntil
             if (Date.now() > isValidUntil.getTime()) {
@@ -193,6 +191,7 @@ export function transferRouter({
             entity.amountProvided = detailledQuote?.cryptoAmount.toString()
             entity.amountReceived = detailledQuote?.fiatAmount.toString()
             entity.fee = '0'
+            console.log('fiatAccounts', fiatAccounts)
 
             /// Verify quote validity
             const isValidUntil: Date = detailledQuote?.guaranteedUntil

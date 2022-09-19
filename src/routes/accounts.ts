@@ -77,16 +77,44 @@ export function accountsRouter({
 
         // Validate data in body for exact fiat account schema type. The body middleware
         // doesn't ensure exact match of fiatAccountSchema and data
-        const validatedData = validateSchema<
-          FiatAccountSchemas[typeof req.body.fiatAccountSchema]
-        >(req.body.data, `${req.body.fiatAccountSchema}Schema`)
         const entity = new Account()
-        entity.institutionName = validatedData.institutionName
-        entity.accountName = validatedData?.accountName
-        entity.fiatAccountType = validatedData?.fiatAccountType
-        entity.owner = userAddress
         entity.fiatAccountSchema = req.body.fiatAccountSchema
-        /// TODO: Generate entity based on validatedData type
+        entity.owner = userAddress
+
+        switch (req.body.fiatAccountSchema) {
+          case 'AccountNumber':
+            const accountNumberAccount = validateSchema<
+              FiatAccountSchemas[typeof req.body.fiatAccountSchema]
+            >(req.body.data, `${req.body.fiatAccountSchema}Schema`)
+            entity.institutionName = accountNumberAccount.institutionName
+            entity.accountName = accountNumberAccount?.accountName
+            entity.fiatAccountType = accountNumberAccount?.fiatAccountType
+            entity.country = accountNumberAccount?.country
+            entity.accountNumber = accountNumberAccount?.accountNumber
+            break
+          case 'DuniaWallet':
+            const data = validateSchema<
+              FiatAccountSchemas[typeof req.body.fiatAccountSchema]
+            >(req.body.data, `${req.body.fiatAccountSchema}Schema`)
+            entity.institutionName = data.institutionName
+            entity.accountName = data?.accountName
+            entity.fiatAccountType = data?.fiatAccountType
+            entity.mobile = data?.mobile
+            break
+          case 'MobileMoney':
+            const momoAccount = validateSchema<
+              FiatAccountSchemas[typeof req.body.fiatAccountSchema]
+            >(req.body.data, `${req.body.fiatAccountSchema}Schema`)
+            entity.institutionName = momoAccount.institutionName
+            entity.accountName = momoAccount?.accountName
+            entity.fiatAccountType = momoAccount?.fiatAccountType
+            entity.country = momoAccount?.country
+            entity.mobile = momoAccount?.mobile
+            entity.operator = momoAccount?.operator
+            break
+          default:
+            break
+        }
 
         try {
           // Load Repository
@@ -143,6 +171,7 @@ export function accountsRouter({
             fiatAccountSchema: account.fiatAccountSchema,
             accountName: account.accountName,
             institutionName: account.institutionName,
+            accountNumber: account.accountNumber,
           }
           formattedBankAccounts.push(add)
         })
@@ -167,7 +196,6 @@ export function accountsRouter({
             fiatAccountSchema: account.fiatAccountSchema,
             accountName: account.accountName,
             institutionName: account.institutionName,
-            operator: account?.operator,
             country: account?.country,
             mobile: account?.mobile,
           }
