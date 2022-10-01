@@ -6,7 +6,6 @@ import { generateNonce, SiweMessage } from 'siwe'
 const DOMAIN = 'localhost'
 const BASE_URL = 'http://localhost:8080'
 
-
 /**
  * This function shows how to use SIWE for authentication with a local server via the FiatConnect API.
  *
@@ -21,10 +20,9 @@ async function main() {
   const accountAddress = ethers.utils.computeAddress(ensureLeading0x(publicKey))
   const wallet = new ethers.Wallet(privateKey)
 
-  const expirationDate = new Date(Date.now() + 14400000)  // 4 hours from now
+  const expirationDate = new Date(Date.now() + 14400000) // 4 hours from now
   const myURL = new URL(BASE_URL)
-  const hostname = myURL.hostname;
-
+  const hostname = myURL.hostname
 
   const siweMessage = new SiweMessage({
     address: wallet.address,
@@ -40,7 +38,6 @@ async function main() {
   const message = siweMessage.prepareMessage()
   const signature = await wallet.signMessage(message)
 
-
   const authResponse = await fetch(`${BASE_URL}/auth/login`, {
     method: 'POST',
     body: JSON.stringify({ message, signature }),
@@ -52,10 +49,10 @@ async function main() {
     return
   }
 
-
   // set-cookie will be of the form:
   // api-starter=<cookie-val>; Path=/; Expires=Fri, 22 Apr 2022 10:36:40 GMT; HttpOnly; SameSite=Strict
   const authCookie = authResponse.headers.raw()['set-cookie'][0]
+  console.log(authCookie)
 }
 
 main()
