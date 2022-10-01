@@ -11,7 +11,7 @@ import { ConversionType } from '../enums'
 
 @Entity()
 export class Quote {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: string
 
   // @Column({ type: 'varchar', length: 255 })

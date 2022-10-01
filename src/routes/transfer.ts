@@ -96,6 +96,7 @@ export function transferRouter({
             const transferAddress = ethers.utils.computeAddress(
               ensureLeading0x(publicKey),
             )
+            console.log('quote', req.body.quoteId)
             entity.id = idempotencyKey
             entity.quoteId = req.body.quoteId
             entity.fiatAccountId = req.body.fiatAccountId

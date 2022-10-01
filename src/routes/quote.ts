@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 import * as dotenv from 'dotenv'
 
 dotenv.config()
@@ -81,8 +79,7 @@ export function quoteRouter({
           isSupportedGeo(_req.body)
           isValidAmount(_req.body)
           // Create new Quote Entity
-          const quote = new Quote()
-          quote.id = v4()
+          const quote: any = new Quote()
 
           // Get live rates from CoinmarketCap API
           const rates = await requestRate(
@@ -113,7 +110,7 @@ export function quoteRouter({
               ? cryptoAmount
               : _req.body.cryptoAmount,
             guaranteedUntil: guaranteedUntil,
-            quoteId: quote.id,
+            quoteId: '',
             transferType: TransferType.TransferIn,
           }
 
@@ -149,11 +146,19 @@ export function quoteRouter({
           }
 
           // Save quote in database
-          const quoteOut = await dataSource.getRepository(Quote).create(quote)
-          await dataSource.getRepository(Quote).save(quoteOut)
+          const quoteIn = await dataSource.getRepository(Quote).create(quote)
+          await dataSource.getRepository(Quote).save(quoteIn)
+          quote.quote.quoteId = quoteIn.id
+          console.log('quote.id', quote.quote.quoteId)
 
           // return get quote/in response
-          return _res.send({ ...quote })
+          return _res.send({
+            quote: {
+              ...quote.quote,
+            },
+            kyc: { ...quote.kyc },
+            fiatAccount: { ...quote.fiatAccount },
+          })
         } catch (error: any) {
           console.warn('ERROR', error)
           switch (error.message) {
@@ -222,7 +227,6 @@ export function quoteRouter({
           isSupportedGeo(_req.body)
           isValidAmount(_req.body)
           const quote = new Quote()
-          quote.id = v4()
 
           let tokenPrice = 0
           let rates
@@ -295,6 +299,8 @@ export function quoteRouter({
           }
           const quoteOut = await dataSource.getRepository(Quote).create(quote)
           await dataSource.getRepository(Quote).save(quoteOut)
+          console.log('quote.id', quoteOut.id)
+
           return _res.send({ ...quote })
         } catch (error: any) {
           switch (error.message) {
