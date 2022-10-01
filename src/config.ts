@@ -60,13 +60,13 @@ export function loadConfig(): Config {
       description: '',
       type: 'string',
       example: '8e434527-ebeb-4233-98ba-1da2a675ebc5',
-      default: process.env.COIN_MARKET_CAP_KEY,
+      default: '8e434527-ebeb-4233-98ba-1da2a675ebc5',
     })
     .option('coin_market_cap_url', {
       description: '',
       type: 'string',
       example: 'https://sandbox-api.coinmarketcap.com/v1',
-      default: process.env.COIN_MARKET_CAP_BASE_URL,
+      default: 'https://sandbox-api.coinmarketcap.com/v1',
     })
     .option('session-secret', {
       description: 'The secret for signing the session',

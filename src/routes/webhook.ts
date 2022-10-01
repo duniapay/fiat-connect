@@ -1,4 +1,3 @@
-
 import axios from 'axios'
 import * as dotenv from 'dotenv'
 import express from 'express'
@@ -8,10 +7,6 @@ import { asyncRoute } from './async-route'
 
 
 dotenv.config()
-
-
-
-
 
 export function webhookRouter({
     clientAuthMiddleware
@@ -47,7 +42,5 @@ export function webhookRouter({
             }
                 return await axios.post(WEBHOOK_URL, options)
           }));
-
-    
     return router
 }

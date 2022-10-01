@@ -71,7 +71,7 @@ export enum SUPPORTED_DOMAINS {
 export enum SUPPORTED_URIS {
   STAGING = 'https://cico-staging.dunia.africa/auth/login',
   PRODUCTION = 'https://cico.dunia.africa/auth/login',
-  DEVELOPMENT = 'http://localhost:5000/auth/login',
+  DEVELOPMENT = 'http://localhost:8080/auth/login',
 }
 
 export enum Network {
