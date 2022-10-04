@@ -1,4 +1,7 @@
-/* eslint-disable no-console */
+import * as dotenv from 'dotenv'
+
+dotenv.config()
+
 import express from 'express'
 import { asyncRoute } from './async-route'
 import { validateSchema } from '../schema/'
@@ -17,16 +20,23 @@ import {
   KycSchema,
   TransferType,
 } from '@fiatconnect/fiatconnect-types'
-import { COINMARKETCAP_KEY } from '../middleware/authenticate'
+import { loadConfig } from '../config'
+import {
+  isSupportedGeo,
+  isValidAmount,
+  requestRate,
+} from '../utils/quote/index.utils'
+import {
+  USD_XOF_RATE,
+  ONE_MINUTE,
+  MIN_CRYPTO_AMOUNT,
+  MAX_CRYPTO_AMOUNT,
+  MIN_FIAT_AMOUNT,
+  MAX_FIAT_AMOUNT,
+  SUPPORTED_COUNTRY_CODE,
+} from '../constants'
 
-const MIN_FIAT_AMOUNT = 1000
-const MAX_FIAT_AMOUNT = 10000
-const ONE_MINUTE = 60
-
-const MIN_CRYPTO_AMOUNT = 0.0004
-const MAX_CRYPTO_AMOUNT = 10
-
-const USD_XOF_RATE = 650
+const { coinMarketCapKey, coinMarketCapUrl } = loadConfig()
 
 export function quoteRouter({
   clientAuthMiddleware,
@@ -54,8 +64,6 @@ export function quoteRouter({
     },
   )
 
-  const SUPPORTED_COUNTRY_CODE = ['BF', 'CI', 'CMR', 'SN']
-
   /**
    * The `POST /quote/in endpoint is used to retrieve quotes used
    * for transfer in to crypto from fiat currencies
@@ -68,38 +76,20 @@ export function quoteRouter({
         _res: express.Response,
       ) => {
         try {
-          isSupportedGeo(
-            _req.body.country,
-            _req.body.fiatType,
-            SUPPORTED_COUNTRY_CODE,
-          )
-          isSupportedFiat(_req.body)
-          isSupportedCrypto(_req.body)
+          isSupportedGeo(_req.body)
           isValidAmount(_req.body)
           // Create new Quote Entity
-          const quote = new Quote()
-          quote.id = v4()
-
-          let tokenPrice = 0
+          const quote: any = new Quote()
 
           // Get live rates from CoinmarketCap API
-          if (_req.body.cryptoAmount && COINMARKETCAP_KEY)
-            await axios
-              .get(
-                'https://sandbox-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest',
-                {
-                  headers: {
-                    'X-CMC_PRO_API_KEY': COINMARKETCAP_KEY,
-                  },
-                  params: { symbol: _req.body.cryptoType },
-                  // eslint-disable-next-line no-console
-                },
-              )
-              .then((res) => {
-                // Set token price from CoinmarketCap API
-                tokenPrice = res.data.data.CUSD.quote.USD.price
-              })
-              .catch((err) => err)
+          const rates = await requestRate(
+            _req.body.cryptoType,
+            coinMarketCapUrl,
+            coinMarketCapKey,
+          )
+          const tokenPrice =
+            rates[_req.body.cryptoType.toUpperCase()].quote.USD?.price
+
           // Estimate fiat amount
           const fiatAmount =
             Number(_req.body.cryptoAmount) * Number(tokenPrice) * USD_XOF_RATE
@@ -120,10 +110,11 @@ export function quoteRouter({
               ? cryptoAmount
               : _req.body.cryptoAmount,
             guaranteedUntil: guaranteedUntil,
-            quoteId: quote.id,
+            quoteId: '',
             transferType: TransferType.TransferIn,
           }
-          ;(quote.kyc = {
+
+          quote.kyc = {
             kycRequired: true,
             kycSchemas: [
               {
@@ -154,13 +145,23 @@ export function quoteRouter({
               },
             })
 
+
           // Save quote in database
-          const quoteOut = await dataSource.getRepository(Quote).create(quote)
-          await dataSource.getRepository(Quote).save(quoteOut)
+          const quoteIn = await dataSource.getRepository(Quote).create(quote)
+          await dataSource.getRepository(Quote).save(quoteIn)
+          quote.quote.quoteId = quoteIn.id
+          console.log('quote.id', quote.quote.quoteId)
 
           // return get quote/in response
-          return _res.send({ ...quote })
+          return _res.send({
+            quote: {
+              ...quote.quote,
+            },
+            kyc: { ...quote.kyc },
+            fiatAccount: { ...quote.fiatAccount },
+          })
         } catch (error: any) {
+          console.warn('ERROR', error)
           switch (error.message) {
             case FiatConnectError.CryptoNotSupported:
               _res.status(400).send({
@@ -202,6 +203,9 @@ export function quoteRouter({
               })
               break
             default:
+              _res.status(400).send({
+                error: FiatConnectError.InvalidParameters,
+              })
               break
           }
         }
@@ -221,34 +225,20 @@ export function quoteRouter({
         _res: express.Response,
       ) => {
         try {
-          isSupportedGeo(
-            _req.body.country,
-            _req.body.fiatType,
-            SUPPORTED_COUNTRY_CODE,
-          )
-          isSupportedFiat(_req.body)
-          isSupportedCrypto(_req.body)
+          isSupportedGeo(_req.body)
           isValidAmount(_req.body)
           const quote = new Quote()
-          quote.id = v4()
 
           let tokenPrice = 0
-          if (_req.body.cryptoAmount && COINMARKETCAP_KEY)
-            await axios
-              .get(
-                'https://sandbox-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest',
-                {
-                  headers: {
-                    'X-CMC_PRO_API_KEY': COINMARKETCAP_KEY.toString(),
-                  },
-                  params: { symbol: _req.body.cryptoType },
-                  // eslint-disable-next-line no-console
-                },
-              )
-              .then((res) => {
-                tokenPrice = res.data.data.CUSD.quote.USD.price
-              })
-              .catch((err) => err)
+          let rates
+          if (_req.body.cryptoAmount)
+            rates = await requestRate(
+              _req.body.cryptoType,
+              coinMarketCapUrl,
+              coinMarketCapKey,
+            )
+          tokenPrice =
+            rates[_req.body.cryptoType.toUpperCase()].quote.USD?.price
 
           const fiatAmount =
             Number(_req.body.cryptoAmount) * Number(tokenPrice) * USD_XOF_RATE
@@ -310,6 +300,8 @@ export function quoteRouter({
           }
           const quoteOut = await dataSource.getRepository(Quote).create(quote)
           await dataSource.getRepository(Quote).save(quoteOut)
+          console.log('quote.id', quoteOut.id)
+
           return _res.send({ ...quote })
         } catch (error: any) {
           switch (error.message) {
@@ -353,81 +345,14 @@ export function quoteRouter({
               })
               break
             default:
+              _res.status(400).send({
+                error: FiatConnectError.InvalidParameters,
+              })
               break
           }
         }
       },
     ),
   )
-
   return router
-}
-
-/// Verify if is supported Crypto
-function isSupportedCrypto(body: QuoteRequestBody) {
-  if (body.cryptoType === CryptoType.cREAL) {
-    throw new Error(FiatConnectError.CryptoNotSupported)
-  }
-}
-
-/// Verify if is supported Crypto
-function isSupportedFiat(body: QuoteRequestBody) {
-  if (body.fiatType !== FiatType.XOF) {
-    throw new Error(FiatConnectError.FiatNotSupported)
-  }
-}
-
-/// Validate Quote Amounts
-function isValidAmount(body: QuoteRequestBody) {
-  const cryptoAmount =
-    body.cryptoAmount !== null ? Number(body?.cryptoAmount) : null
-  const fiatAmount = body.fiatAmount !== null ? Number(body?.fiatAmount) : null
-
-  if (cryptoAmount !== null) {
-    if (cryptoAmount < MIN_CRYPTO_AMOUNT) {
-      throw new Error(FiatConnectError.CryptoAmountTooLow)
-    } else if (cryptoAmount > MAX_CRYPTO_AMOUNT) {
-      throw new Error(FiatConnectError.CryptoAmountTooHigh)
-    }
-  }
-  // Validate Fiat amount
-  if (fiatAmount !== null) {
-    if (fiatAmount < MIN_FIAT_AMOUNT) {
-      throw new Error(FiatConnectError.FiatAmountTooLow)
-    } else if (fiatAmount > MAX_FIAT_AMOUNT) {
-      throw new Error(FiatConnectError.FiatAmountTooHigh)
-    }
-  }
-}
-
-function isSupportedGeo(
-  country: string,
-  fiatType: FiatType,
-  supportedCountries: string[],
-) {
-  // is Geo Supported
-  const isSupported = supportedCountries.find((ctr) => {
-    return ctr === country
-  })
-
-  if (!isSupported) {
-    throw new Error(FiatConnectError.GeoNotSupported)
-  }
-
-  // Fiat Type should be allowed in GEO
-  switch (fiatType) {
-    case FiatType.XOF:
-      if (country !== 'BF') {
-        throw new Error(FiatConnectError.GeoNotSupported)
-      }
-      break
-    case FiatType.XAF:
-      if (country !== 'CMR') {
-        throw new Error(FiatConnectError.GeoNotSupported)
-      }
-      // Check if one of supported country
-      break
-    default:
-      break
-  }
 }

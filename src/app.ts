@@ -6,6 +6,7 @@ import { accountsRouter } from './routes/accounts'
 import { transferRouter } from './routes/transfer'
 import { errorToStatusCode } from './middleware/error'
 import { authRouter } from './routes/auth'
+import { webhookRouter } from './routes/webhook'
 import { AppDataSource } from './utils/data-source'
 
 function getSessionName(): string {
@@ -46,6 +47,7 @@ export function initApp({
   )
 
   app.use('/auth', authRouter({ chainId, client }))
+  app.use('/webhook', webhookRouter({ chainId }))
 
   app.use('/quote', quoteRouter({ clientAuthMiddleware, client, dataSource }))
   app.use('/kyc', kycRouter({ clientAuthMiddleware, dataSource }))
