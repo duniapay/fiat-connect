@@ -5,6 +5,9 @@ import { TransferRequestBody, TransferStatusRequestParams } from '../types'
 import { siweAuthMiddleware } from '../middleware/authenticate'
 import { Transfer } from '../entity/transfer.entity'
 import {
+  CryptoType,
+  FiatAccountSchema,
+  FiatAccountType,
   FiatConnectError,
   TransferStatus,
   TransferType,
@@ -15,6 +18,7 @@ import { ensureLeading0x } from '@celo/utils/lib/address'
 import * as dotenv from 'dotenv'
 import { Quote } from '../entity/quote.entity'
 import { Repository } from 'typeorm'
+import { Account } from '../entity/account.entity'
 
 dotenv.config()
 
@@ -42,7 +46,7 @@ export function transferRouter({
   // Load Repository
   const repository = dataSource.getRepository(Transfer)
   const quoteRepository: Repository<Quote> = dataSource.getRepository(Quote)
-
+  const accountRepository = dataSource.getRepository(Account)
   const entity = new Transfer()
 
   router.use(siweAuthMiddleware)
@@ -105,10 +109,17 @@ export function transferRouter({
             const quote = await quoteRepository.findOneBy({
               id: req.body.quoteId,
             })
-            //TODO: GET AccountSchema
-            const fiatAccounts = quote?.fiatAccount
+            const account: Account = await accountRepository.findOneBy({
+              id: req.body.fiatAccountId,
+            })
+            const fiatAccounts: any = quote?.fiatAccount
             const detailledQuote: any = quote?.quote
-
+            let fee = 0
+            if (account.fiatAccountType === FiatAccountType.MobileMoney) {
+              fee = fiatAccounts[FiatAccountSchema.MobileMoney]?.fee
+            } else {
+              fee = fiatAccounts[FiatAccountSchema.DuniaWallet]?.fee
+            }
             entity.fiatType = detailledQuote?.fiatType
             entity.cryptoType = detailledQuote?.cryptoType
             entity.amountProvided = detailledQuote?.fiatAmount.toString()
@@ -123,7 +134,7 @@ export function transferRouter({
 
             //TODO: GET Fee from account Map
 
-            entity.fee = '0'
+            entity.fee = fee
             const results = await repository.save(entity)
             await markKeyAsUsed(idempotencyKey, client, results.id)
 
@@ -176,6 +187,7 @@ export function transferRouter({
             const transferAddress = ethers.utils.computeAddress(
               ensureLeading0x(publicKey),
             )
+
             entity.id = idempotencyKey
             entity.quoteId = req.body.quoteId
             entity.fiatAccountId = req.body.fiatAccountId
@@ -184,22 +196,28 @@ export function transferRouter({
             const quote = await quoteRepository.findOneBy({
               id: req.body.quoteId,
             })
-            const fiatAccounts = quote?.fiatAccount
+            const fiatAccounts: any = quote?.fiatAccount
             const detailledQuote: any = quote?.quote
+            const account: Account = await accountRepository.findOneBy({
+              id: req.body.fiatAccountId,
+            })
 
             entity.fiatType = detailledQuote?.fiatType
             entity.cryptoType = detailledQuote?.cryptoType
             entity.amountProvided = detailledQuote?.cryptoAmount.toString()
             entity.amountReceived = detailledQuote?.fiatAmount.toString()
-            entity.fee = '0'
-            console.log('fiatAccounts', fiatAccounts)
+            let fee = 0
 
-            /// Verify quote validity
-            const isValidUntil: Date = detailledQuote?.guaranteedUntil
-            if (Date.now() > isValidUntil.getTime()) {
-              entity.status = TransferStatus.TransferFailed
+            if (account.fiatAccountType === FiatAccountType.MobileMoney) {
+              fee = fiatAccounts[FiatAccountSchema.MobileMoney]?.fee
+            } else if (
+              account.fiatAccountType === FiatAccountType.DuniaWallet
+            ) {
+              fee = fiatAccounts[FiatAccountSchema.DuniaWallet]?.fee
+            } else {
+              fee = fiatAccounts[FiatAccountSchema.AccountNumber]?.fee
             }
-            entity.status = TransferStatus.TransferStarted
+            entity.fee = fee
 
             const results = await repository.save(entity)
 
