@@ -51,5 +51,5 @@ export class Transfer {
   @Column({ name: 'amountReceived' })
   amountReceived: string
   @Column({ name: 'fee' })
-  fee: string
+  fee: number
 }
