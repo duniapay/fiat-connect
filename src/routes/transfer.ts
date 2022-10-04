@@ -9,7 +9,6 @@ import {
   FiatAccountSchema,
   FiatAccountType,
   FiatConnectError,
-  FiatType,
   TransferStatus,
   TransferType,
 } from '@fiatconnect/fiatconnect-types'
@@ -23,7 +22,7 @@ import { Account } from '../entity/account.entity'
 
 dotenv.config()
 
-/// Load private keys from environment variable
+/// Load private keys from environment
 const SENDER_PRIVATE_KEY: string =
   process.env.SENDER_PRIVATE_KEY !== undefined
     ? process.env.SENDER_PRIVATE_KEY
@@ -101,10 +100,10 @@ export function transferRouter({
             const transferAddress = ethers.utils.computeAddress(
               ensureLeading0x(publicKey),
             )
+            console.log('quote', req.body.quoteId)
             entity.id = idempotencyKey
             entity.quoteId = req.body.quoteId
             entity.fiatAccountId = req.body.fiatAccountId
-            entity.status = TransferStatus.TransferStarted
             entity.transferAddress = transferAddress
             entity.transferType = TransferType.TransferIn
             const quote = await quoteRepository.findOneBy({
@@ -125,8 +124,14 @@ export function transferRouter({
             entity.cryptoType = detailledQuote?.cryptoType
             entity.amountProvided = detailledQuote?.fiatAmount.toString()
             entity.amountReceived = detailledQuote?.cryptoAmount.toString()
+            console.log('fiatAccounts', fiatAccounts)
+            /// Verify quote validity
+            const isValidUntil: Date = detailledQuote?.guaranteedUntil
+            if (Date.now() > isValidUntil.getTime()) {
+              entity.status = TransferStatus.TransferFailed
+            }
+            entity.status = TransferStatus.TransferStarted
 
-            //TODO: GET AccountSchema
             //TODO: GET Fee from account Map
 
             entity.fee = fee
@@ -186,7 +191,6 @@ export function transferRouter({
             entity.id = idempotencyKey
             entity.quoteId = req.body.quoteId
             entity.fiatAccountId = req.body.fiatAccountId
-            entity.status = TransferStatus.TransferStarted
             entity.transferAddress = transferAddress
             entity.transferType = TransferType.TransferOut
             const quote = await quoteRepository.findOneBy({
@@ -214,6 +218,7 @@ export function transferRouter({
               fee = fiatAccounts[FiatAccountSchema.AccountNumber]?.fee
             }
             entity.fee = fee
+
             const results = await repository.save(entity)
 
             await markKeyAsUsed(idempotencyKey, client, results.id)

@@ -19,6 +19,8 @@ export function kycRouter({
   dataSource: any
 }): express.Router {
   const router = express.Router()
+  /// Load repository
+  const repository = dataSource.getRepository(KYC)
 
   router.use(siweAuthMiddleware)
   router.use(clientAuthMiddleware)
@@ -53,10 +55,8 @@ export function kycRouter({
         const formattedSchema = validateSchema<
           KycSchemas[typeof req.params.kycSchema]
         >(req.body, `${req.params.kycSchema}KycSchema`)
-        /// TODO: Handle Geo
         try {
           // Load Repository
-          const repository = dataSource.getRepository(KYC)
           const entity = new KYC()
 
           entity.address = formattedSchema?.address
@@ -124,7 +124,6 @@ export function kycRouter({
       ) => {
         try {
           // Load Repository
-          const repository = dataSource.getRepository(KYC)
 
           const userAddress = _req.session.siwe?.address
           let result
