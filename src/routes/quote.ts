@@ -121,29 +121,30 @@ export function quoteRouter({
                 kycSchema: KycSchema.PersonalDataAndDocuments,
               },
             ],
-          }
-          quote.fiatAccount = {
-            [FiatAccountSchema.MobileMoney]: {
-              fiatAccountSchemas: [
-                {
-                  fiatAccountSchema: FiatAccountSchema.MobileMoney,
-                },
-              ],
-              fee: 0.025,
-              feeType: FeeType.PlatformFee,
-              feeFrequency: FeeFrequency.OneTime,
-            },
-            [FiatAccountSchema.DuniaWallet]: {
-              fiatAccountSchemas: [
-                {
-                  fiatAccountSchema: FiatAccountSchema.DuniaWallet,
-                },
-              ],
-              fee: 0.5,
-              feeType: FeeType.PlatformFee,
-              feeFrequency: FeeFrequency.OneTime,
-            },
-          }
+          }),
+            (quote.fiatAccount = {
+              [FiatAccountSchema.MobileMoney]: {
+                fiatAccountSchemas: [
+                  {
+                    fiatAccountSchema: FiatAccountSchema.MobileMoney,
+                  },
+                ],
+                fee: 0.02 * Number(_req.body.cryptoAmount),
+                feeType: FeeType.PlatformFee,
+                feeFrequency: FeeFrequency.OneTime,
+              },
+              [FiatAccountSchema.DuniaWallet]: {
+                fiatAccountSchemas: [
+                  {
+                    fiatAccountSchema: FiatAccountSchema.DuniaWallet,
+                  },
+                ],
+                fee: 0.01 * Number(_req.body.cryptoAmount),
+                feeType: FeeType.PlatformFee,
+                feeFrequency: FeeFrequency.OneTime,
+              },
+            })
+
 
           // Save quote in database
           const quoteIn = await dataSource.getRepository(Quote).create(quote)
@@ -272,7 +273,7 @@ export function quoteRouter({
                   fiatAccountSchema: FiatAccountSchema.MobileMoney,
                 },
               ],
-              fee: 0.025,
+              fee: 0.02 * Number(_req.body.cryptoAmount),
               feeType: FeeType.PlatformFee,
               feeFrequency: FeeFrequency.OneTime,
             },
@@ -282,7 +283,7 @@ export function quoteRouter({
                   fiatAccountSchema: FiatAccountSchema.DuniaWallet,
                 },
               ],
-              fee: 0.5,
+              fee: 0.015 * Number(_req.body.cryptoAmount),
               feeType: FeeType.PlatformFee,
               feeFrequency: FeeFrequency.OneTime,
             },
@@ -292,7 +293,7 @@ export function quoteRouter({
                   fiatAccountSchema: FiatAccountSchema.AccountNumber,
                 },
               ],
-              fee: 1,
+              fee: 0.025 * Number(_req.body.cryptoAmount),
               feeType: FeeType.PlatformFee,
               feeFrequency: FeeFrequency.OneTime,
             },
