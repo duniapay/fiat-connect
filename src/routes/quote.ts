@@ -33,7 +33,6 @@ import {
   MAX_CRYPTO_AMOUNT,
   MIN_FIAT_AMOUNT,
   MAX_FIAT_AMOUNT,
-  SUPPORTED_COUNTRY_CODE,
 } from '../constants'
 
 const { coinMarketCapKey, coinMarketCapUrl } = loadConfig()
@@ -113,8 +112,7 @@ export function quoteRouter({
             quoteId: '',
             transferType: TransferType.TransferIn,
           }
-
-          quote.kyc = {
+          ;(quote.kyc = {
             kycRequired: true,
             kycSchemas: [
               {
@@ -144,7 +142,6 @@ export function quoteRouter({
                 feeFrequency: FeeFrequency.OneTime,
               },
             })
-
 
           // Save quote in database
           const quoteIn = await dataSource.getRepository(Quote).create(quote)

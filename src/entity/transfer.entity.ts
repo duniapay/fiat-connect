@@ -4,11 +4,11 @@ import {
   TransferStatus,
   TransferType,
 } from '@fiatconnect/fiatconnect-types'
-import { Entity, Column, PrimaryGeneratedColumn, PrimaryColumn } from 'typeorm'
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity()
 export class Transfer {
-  @PrimaryColumn('uuid')
+  @PrimaryGeneratedColumn('uuid')
   id: string
 
   @Column({ name: 'fiatAccountId', type: 'varchar', length: 255 })
@@ -50,6 +50,6 @@ export class Transfer {
   amountProvided: string
   @Column({ name: 'amountReceived' })
   amountReceived: string
-  @Column({ name: 'fee' })
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   fee: number
 }

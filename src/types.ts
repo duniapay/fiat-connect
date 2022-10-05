@@ -61,7 +61,21 @@ export interface AuthenticationConfig {
   web3ProviderUrl: string
   chainId: number
 }
+export interface WebhookEvent {
+  event: KYC_EVENTS | TRANSFER_EVENTS
+  data: any
+  url: string
+}
 
+export enum KYC_EVENTS {
+  created = 'created',
+  updated = 'updated',
+}
+
+export enum TRANSFER_EVENTS {
+  created = 'created',
+  updated = 'updated',
+}
 export enum SUPPORTED_DOMAINS {
   STAGING = 'cico-staging.dunia.africa',
   PRODUCTION = 'cico.dunia.africa',

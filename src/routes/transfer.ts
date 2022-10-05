@@ -26,12 +26,12 @@ dotenv.config()
 const SENDER_PRIVATE_KEY: string =
   process.env.SENDER_PRIVATE_KEY !== undefined
     ? process.env.SENDER_PRIVATE_KEY
-    : ''
+    : '0x9999999999999999999999999999999999999999999999999999999999999999'
 
 const RECEIVER_PRIVATE_KEY: string =
   process.env.RECEIVER_PRIVATE_KEY !== undefined
     ? process.env.RECEIVER_PRIVATE_KEY
-    : ''
+    : '0x9999999999999999999999999999999999999999999999999999999999999999'
 
 export function transferRouter({
   clientAuthMiddleware,
@@ -88,20 +88,20 @@ export function transferRouter({
         let isKeyValid
         if (idempotencyKey) {
           isKeyValid = await validateIdempotencyKey(idempotencyKey, client)
-        } else {
-          return res.status(422).send('Unprocessable Entity')
         }
         // Check if the idempotency key is already in the cache
-        if (isKeyValid) {
+        if (idempotencyKey && isKeyValid) {
           try {
             // Load the corresponding privateKey
+            console.log('SENDER_PRIVATE_KEY', SENDER_PRIVATE_KEY)
+
             const publicKey = new ethers.utils.SigningKey(SENDER_PRIVATE_KEY)
               .compressedPublicKey
             const transferAddress = ethers.utils.computeAddress(
               ensureLeading0x(publicKey),
             )
             console.log('quote', req.body.quoteId)
-            entity.id = idempotencyKey
+
             entity.quoteId = req.body.quoteId
             entity.fiatAccountId = req.body.fiatAccountId
             entity.transferAddress = transferAddress
@@ -126,37 +126,29 @@ export function transferRouter({
             entity.amountReceived = detailledQuote?.cryptoAmount.toString()
             console.log('fiatAccounts', fiatAccounts)
             /// Verify quote validity
-            const isValidUntil: Date = detailledQuote?.guaranteedUntil
+            const isValidUntil = new Date(detailledQuote?.guaranteedUntil)
             if (Date.now() > isValidUntil.getTime()) {
               entity.status = TransferStatus.TransferFailed
             }
             entity.status = TransferStatus.TransferStarted
 
-            //TODO: GET Fee from account Map
-
             entity.fee = fee
             const results = await repository.save(entity)
-            await markKeyAsUsed(idempotencyKey, client, results.id)
+            await markKeyAsUsed(idempotencyKey, client, entity.id)
 
-            return res.send({
+            return res.status(200).send({
               transferId: entity.id,
               transferStatus: entity.status,
-              // Address from which the transfer will be sent
+              // Address that the user must send funds to
               transferAddress: entity.transferAddress,
             })
           } catch (error: any) {
+            console.log(error)
             res.status(409).send({ error: FiatConnectError.ResourceExists })
           }
+        } else {
+          return res.status(422).send('Unprocessable Entity')
         }
-        const transfer = await repository.findOneBy({
-          id: idempotencyKey,
-        })
-        return res.send({
-          transferId: transfer.id,
-          transferStatus: transfer.status,
-          // Address that the user must send funds to
-          transferAddress: transfer.transferAddress,
-        })
       },
     ),
   )
@@ -188,7 +180,6 @@ export function transferRouter({
               ensureLeading0x(publicKey),
             )
 
-            entity.id = idempotencyKey
             entity.quoteId = req.body.quoteId
             entity.fiatAccountId = req.body.fiatAccountId
             entity.transferAddress = transferAddress
@@ -198,6 +189,7 @@ export function transferRouter({
             })
             const fiatAccounts: any = quote?.fiatAccount
             const detailledQuote: any = quote?.quote
+
             const account: Account = await accountRepository.findOneBy({
               id: req.body.fiatAccountId,
             })
@@ -206,6 +198,13 @@ export function transferRouter({
             entity.cryptoType = detailledQuote?.cryptoType
             entity.amountProvided = detailledQuote?.cryptoAmount.toString()
             entity.amountReceived = detailledQuote?.fiatAmount.toString()
+
+            console.log('fiatAccounts', fiatAccounts)
+            /// Verify quote validity
+            const isValidUntil = new Date(detailledQuote?.guaranteedUntil)
+            if (Date.now() > isValidUntil.getTime()) {
+              entity.status = TransferStatus.TransferFailed
+            }
             let fee = 0
 
             if (account.fiatAccountType === FiatAccountType.MobileMoney) {
@@ -223,25 +222,17 @@ export function transferRouter({
 
             await markKeyAsUsed(idempotencyKey, client, results.id)
 
-            return res.send({
-              transferId: results.id,
+            return res.status(200).send({
+              transferId: entity.id,
               transferStatus: entity.status,
               // Address that the user must send funds to
               transferAddress: entity.transferAddress,
             })
           } catch (error: any) {
+            console.log(error)
             res.status(409).send({ error: FiatConnectError.ResourceExists })
           }
         }
-        const transfer = await repository.findOneBy({
-          id: idempotencyKey,
-        })
-        return res.send({
-          transferId: transfer.id,
-          transferStatus: transfer.status,
-          // Address that the user must send funds to
-          transferAddress: transfer.transferAddress,
-        })
       },
     ),
   )

@@ -47,7 +47,7 @@ export function initApp({
   )
 
   app.use('/auth', authRouter({ chainId, client }))
-  app.use('/webhook', webhookRouter({ chainId }))
+  app.use('/webhook', webhookRouter({ clientAuthMiddleware }))
 
   app.use('/quote', quoteRouter({ clientAuthMiddleware, client, dataSource }))
   app.use('/kyc', kycRouter({ clientAuthMiddleware, dataSource }))
