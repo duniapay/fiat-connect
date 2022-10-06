@@ -1,6 +1,5 @@
 import express from 'express'
 import Session from 'express-session'
-import responseTime from 'response-time'
 
 import { quoteRouter } from './routes/quote'
 import { kycRouter } from './routes/kyc'
@@ -58,7 +57,6 @@ export function initApp({
     '/transfer',
     transferRouter({ clientAuthMiddleware, dataSource, client }),
   )
-  app.use(responseTime())
 
   app.use(errorToStatusCode)
   return app
