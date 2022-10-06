@@ -3,7 +3,7 @@ module.exports = {
     {
       name: `fiatconnect`,
       script: 'build/src/index.js',
-      instances: 'max',
+      instances: '2',
       exec_mode: 'cluster',
       env: {
         NODE_ENV: 'localhost',
