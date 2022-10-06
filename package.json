@@ -12,7 +12,7 @@
     "preinstall": "npm i -g pm2",
     "lint": "eslint --ext=.tsx,.ts --fix src/",
     "dev": "./scripts/dev.sh",
-    "start": "npm run build && ./scripts/start.sh",
+    "start": "./scripts/start.sh",
     "test": "jest --config=jest.config.js",
     "test:e2e": "jest --config=jest-e2e.config.js",
     "dev:server": "NODE_ENV=localhost nodemon  -r dotenv/config --watch './**/*.ts' --exec 'ts-node' --files ./src/index.ts --auth-config-option alfajores --session-secret poiii",
