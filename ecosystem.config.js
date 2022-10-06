@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: `fiatconnect`,
-      script: 'build/server/app.js',
+      script: 'build/src/index.js',
       instances: 'max',
       exec_mode: 'cluster',
       node_args: '--session-secret=hell, --auth-config-option=alfajores',
