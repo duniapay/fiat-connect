@@ -162,7 +162,7 @@ export function quoteRouter({
           const quoteIn = await dataSource.getRepository(Quote).create(quote)
           await dataSource.getRepository(Quote).save(quoteIn)
           quote.quote.quoteId = quoteIn.id
-          console.log('quote.id', quote.quote.quoteId)
+          console.log('quote', quote.quote.quoteId)
 
           // return get quote/in response
           return _res.send({
