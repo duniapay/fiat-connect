@@ -23,10 +23,7 @@ async function main() {
   AppDataSource.initialize()
     .then(async () => {
       // start express server
-      app.listen(port, () => {
-        // eslint-disable-next-line no-console
-        console.log(`Listening on http://localhost:${port}`)
-      })
+      app.listen(port, '0.0.0.0')
       // eslint-disable-next-line no-console
     })
     .catch((error) => console.log(error))
