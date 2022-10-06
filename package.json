@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "description": "DUNIA PAYMENT implementation of FiatConnect API",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "tsc",

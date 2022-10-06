@@ -1,6 +1,4 @@
 import {
-  FeeFrequency,
-  FeeType,
   FiatAccountSchema,
   FiatAccountType,
   SupportedOperatorEnum,
