@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-ts-node src/index.ts --auth-config-option $AUTH_CONFIG_OPTION --session-secret $SESSION_SECRET
+pm2-runtime start build/src/index.js -i 1 --env development

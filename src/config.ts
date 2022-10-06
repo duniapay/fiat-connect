@@ -34,15 +34,19 @@ export function loadConfig(): Config {
   dotenv.config()
   const DEFAULT_PORT =
     process.env.PORT !== undefined ? parseInt(process.env.PORT, 10) : 8080
-
+  const DEFAULT_SESSION_SECRET =
+    process.env.SESSION_SECRET !== undefined
+      ? process.env.SESSION_SECRET
+      : 'rikarika'
   const argv = yargs
     .env('')
     .option('auth-config-option', {
       description: 'Authentication strategy to use',
       example: 'mainnet',
       type: 'string',
-      demandOption: true,
+      demandOption: false,
       choices: Object.keys(authConfigOptions),
+      default: 'alfajores',
     })
     .option('port', {
       description: 'Port to use for running the API',
@@ -71,7 +75,8 @@ export function loadConfig(): Config {
     .option('session-secret', {
       description: 'The secret for signing the session',
       type: 'string',
-      demandOption: true,
+      demandOption: false,
+      default: DEFAULT_SESSION_SECRET,
     })
     .option('redis', {
       description: 'Redis server to connect',

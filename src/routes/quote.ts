@@ -79,13 +79,28 @@ export function quoteRouter({
           isValidAmount(_req.body)
           // Create new Quote Entity
           const quote: any = new Quote()
+          const cacheResults = await client.get(_req.body.cryptoType)
+          let isCached = false
+          let rates
 
-          // Get live rates from CoinmarketCap API
-          const rates = await requestRate(
-            _req.body.cryptoType,
-            coinMarketCapUrl,
-            coinMarketCapKey,
-          )
+          if (cacheResults) {
+            isCached = true
+            rates = JSON.parse(cacheResults)
+          } else {
+            if (_req.body.cryptoAmount) {
+              rates = await requestRate(
+                _req.body.cryptoType,
+                coinMarketCapUrl,
+                coinMarketCapKey,
+              )
+              await client.set(_req.body.cryptoType, JSON.stringify(rates), {
+                NX: true,
+              })
+            }
+            if (rates) {
+              throw 'API returned an empty array'
+            }
+          }
           const tokenPrice =
             rates[_req.body.cryptoType.toUpperCase()].quote.USD?.price
 
@@ -225,15 +240,31 @@ export function quoteRouter({
           isSupportedGeo(_req.body)
           isValidAmount(_req.body)
           const quote = new Quote()
+          let isCached = false
 
           let tokenPrice = 0
           let rates
-          if (_req.body.cryptoAmount)
-            rates = await requestRate(
-              _req.body.cryptoType,
-              coinMarketCapUrl,
-              coinMarketCapKey,
-            )
+          const cacheResults = await client.get(_req.body.cryptoType)
+
+          if (cacheResults) {
+            isCached = true
+            rates = JSON.parse(cacheResults)
+          } else {
+            if (_req.body.cryptoAmount) {
+              rates = await requestRate(
+                _req.body.cryptoType,
+                coinMarketCapUrl,
+                coinMarketCapKey,
+              )
+              await client.set(_req.body.cryptoType, JSON.stringify(rates), {
+                NX: true,
+              })
+            }
+            if (rates) {
+              throw 'API returned an empty array'
+            }
+          }
+
           tokenPrice =
             rates[_req.body.cryptoType.toUpperCase()].quote.USD?.price
 
