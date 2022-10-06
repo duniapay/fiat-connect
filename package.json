@@ -9,6 +9,7 @@
   "scripts": {
     "build": "rimraf dist && tsc",
     "format": "prettier --loglevel error --write \"./src/**/*.ts\"",
+    "preinstall": "npm i -g pm2",
     "lint": "eslint --ext=.tsx,.ts --fix src/",
     "dev": "./scripts/dev.sh",
     "start": "./scripts/start.sh",
@@ -47,6 +48,7 @@
     "prettier": "^2.7.1",
     "redis": "^4.2.0",
     "reflect-metadata": "^0.1.13",
+    "response-time": "^2.3.2",
     "rewire": "^6.0.0",
     "siwe": "^1.1.6",
     "typeorm": "0.3.7",
@@ -61,6 +63,7 @@
     "@types/jest": "^27.4.1",
     "@types/node": "^16.11.10",
     "@types/node-fetch": "2",
+    "@types/response-time": "^2.3.5",
     "@types/rewire": "^2.5.28",
     "@types/supertest": "^2.0.11",
     "@types/uuid": "^8.3.4",
