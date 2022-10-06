@@ -19,7 +19,7 @@ export const AppDataSource = new DataSource({
   synchronize: process.env.NODE_ENV === 'development' ? true : false,
   dropSchema: process.env.NODE_ENV === 'development' ? true : false,
   logging: false,
-  entities: ['src/entity/*.ts'],
+  entities: ['build/src/entity/*.js'],
   migrations: [],
   subscribers: [],
   ssl: true,
