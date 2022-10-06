@@ -97,7 +97,7 @@ export function quoteRouter({
                 NX: true,
               })
             }
-            if (rates) {
+            if (rates === undefined) {
               throw 'API returned an empty array'
             }
           }
@@ -260,7 +260,7 @@ export function quoteRouter({
                 NX: true,
               })
             }
-            if (rates) {
+            if (rates === undefined) {
               throw 'API returned an empty array'
             }
           }
