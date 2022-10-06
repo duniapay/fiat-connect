@@ -13,19 +13,19 @@ export const AppDataSource = new DataSource({
   type: 'postgres',
   host: process.env.DATABASE_HOST,
   port: DATABASE_PORT,
-  username: process.env.DATABASE_USERNAME,
-  password: process.env.DATABASE_PASSWORD,
-  database: process.env.DATABASE_NAME,
+  username: 'postgres',
+  password: 'admin',
+  database: 'postgres',
   synchronize: process.env.NODE_ENV === 'development' ? true : false,
   dropSchema: process.env.NODE_ENV === 'development' ? true : false,
   logging: false,
   entities: ['src/entity/*.ts'],
   migrations: [],
   subscribers: [],
-  ssl: true,
-  extra: {
-    ssl: {
-      rejectUnauthorized: false,
-    },
-  },
+  // ssl: true,
+  // extra: {
+  //   ssl: {
+  //     rejectUnauthorized: false,
+  //   },
+  // },
 })
