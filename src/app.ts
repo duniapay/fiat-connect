@@ -44,7 +44,7 @@ export function initApp({
       secret: sessionSecret,
       resave: true,
       saveUninitialized: true,
-      cookie: { secure: false, sameSite: true },
+      cookie: { secure: true, sameSite: true },
     }),
   )
 
