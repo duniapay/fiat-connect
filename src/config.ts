@@ -83,7 +83,9 @@ export function loadConfig(): Config {
       example: process.env.REDISCLOUD_URL,
       type: 'string',
       default:
-        `redis://${process.env.REDISCLOUD_URL}` || `redis://localhost:6379`,
+        process.env.NODE_ENV !== 'development'
+          ? `redis://${process.env.REDISCLOUD_URL}`
+          : `redis://localhost:6379`,
     })
     .parseSync()
 
