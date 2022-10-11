@@ -9,7 +9,11 @@ import {
   FiatConnectError,
   KycSchema,
   KycStatus,
+  WebhookEventType,
+  WebhookRequestBody,
 } from '@fiatconnect/fiatconnect-types'
+import { notifyPartner } from './webhook'
+import { v4 as uuidv4 } from 'uuid'
 
 export function kycRouter({
   clientAuthMiddleware,
@@ -62,7 +66,7 @@ export function kycRouter({
           entity.address = formattedSchema?.address
           entity.dateOfBirth = formattedSchema?.dateOfBirth
           entity.firstName = formattedSchema?.firstName
-          entity.owner = userAddress !== undefined ? userAddress : ''
+          entity.owner = userAddress!
           entity.lastName = formattedSchema?.lastName
           entity.middleName = formattedSchema?.middleName
           entity.phoneNumber = formattedSchema?.phoneNumber
@@ -73,6 +77,20 @@ export function kycRouter({
           entity.status = KycStatus.KycPending
 
           await repository.save(entity)
+
+          const d: WebhookRequestBody<WebhookEventType.KycStatusEvent> = {
+            eventType: WebhookEventType.KycStatusEvent,
+            provider: 'dunia-payment',
+            eventId: uuidv4(),
+            timestamp: Date.now().toString(),
+            address: entity.owner,
+            payload: {
+              kycSchema: entity.kycSchemaName,
+              kycStatus: entity.status,
+            },
+          }
+          const webhookSecret = process.env.WEBHOOK_SECRET!
+          await notifyPartner(d, webhookSecret)
           return _res.send({ kycStatus: KycStatus.KycPending })
         } catch (error) {
           return _res
