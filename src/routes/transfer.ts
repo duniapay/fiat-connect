@@ -4,14 +4,19 @@ import { validateSchema } from '../schema/'
 import { TransferRequestBody, TransferStatusRequestParams } from '../types'
 import { siweAuthMiddleware } from '../middleware/authenticate'
 import { Transfer } from '../entity/transfer.entity'
+import { v4 as uuidv4 } from 'uuid'
+
 import {
   CryptoType,
   FiatAccountSchema,
   FiatAccountType,
   FiatConnectError,
   TransferStatus,
+  WebhookRequestBody,
   TransferType,
+  WebhookEventType,
 } from '@fiatconnect/fiatconnect-types'
+
 import { ethers } from 'ethers'
 import { ensureLeading0x } from '@celo/utils/lib/address'
 
@@ -19,6 +24,7 @@ import * as dotenv from 'dotenv'
 import { Quote } from '../entity/quote.entity'
 import { Repository } from 'typeorm'
 import { Account } from '../entity/account.entity'
+import { notifyPartner } from './webhook'
 
 dotenv.config()
 
@@ -135,7 +141,31 @@ export function transferRouter({
             entity.fee = fee
             const results = await repository.save(entity)
             await markKeyAsUsed(idempotencyKey, client, entity.id)
+            const userAddress = req.session.siwe?.address!
 
+            const d: WebhookRequestBody<WebhookEventType.TransferInStatusEvent> =
+              {
+                eventType: WebhookEventType.TransferInStatusEvent,
+                provider: 'dunia-payment',
+                eventId: uuidv4(),
+                timestamp: Date.now().toString(),
+                address: userAddress,
+                payload: {
+                  status: entity.status,
+                  transferType: TransferType.TransferIn,
+                  fiatType: entity.fiatType,
+                  cryptoType: entity.cryptoType,
+                  amountProvided: entity.amountProvided,
+                  amountReceived: entity.amountReceived,
+                  fee: fee.toString(),
+                  fiatAccountId: entity.fiatAccountId,
+                  transferId: entity.id,
+                  transferAddress: entity.transferAddress,
+                },
+              }
+            const webhookSecret = process.env.WEBHOOK_SECRET!
+
+            await notifyPartner(d, webhookSecret)
             return res.status(200).send({
               transferId: entity.id,
               transferStatus: entity.status,
@@ -219,9 +249,32 @@ export function transferRouter({
             entity.fee = fee
 
             const results = await repository.save(entity)
+            const userAddress = req.session.siwe?.address!
 
             await markKeyAsUsed(idempotencyKey, client, results.id)
+            const d: WebhookRequestBody<WebhookEventType.TransferOutStatusEvent> =
+              {
+                eventType: WebhookEventType.TransferOutStatusEvent,
+                provider: 'dunia-payment',
+                eventId: uuidv4(),
+                timestamp: Date.now().toString(),
+                address: userAddress,
+                payload: {
+                  status: entity?.status!,
+                  transferType: TransferType.TransferOut,
+                  fiatType: entity.fiatType,
+                  cryptoType: entity.cryptoType,
+                  amountProvided: entity.amountProvided,
+                  amountReceived: entity.amountReceived,
+                  fee: fee.toString(),
+                  fiatAccountId: entity.fiatAccountId,
+                  transferId: entity.id,
+                  transferAddress: entity.transferAddress,
+                },
+              }
+            const webhookSecret = process.env.WEBHOOK_SECRET!
 
+            await notifyPartner(d, webhookSecret)
             return res.status(200).send({
               transferId: entity.id,
               transferStatus: entity.status,
