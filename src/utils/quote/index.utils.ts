@@ -14,6 +14,8 @@ import {
 } from '../../constants'
 
 function isValidAmount(body: QuoteRequestBody) {
+  if(body.cryptoAmount?.includes('e+'))
+    throw new Error(FiatConnectError.CryptoAmountTooHigh)
   if (!isNumber(body)) {
     console.log('isValidAmount')
     throw new Error(FiatConnectError.InvalidParameters)
