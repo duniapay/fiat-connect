@@ -239,7 +239,7 @@ export function quoteRouter({
         try {
           isSupportedGeo(_req.body)
           isValidAmount(_req.body)
-          const quote = new Quote()
+          const quote: any = new Quote()
           let isCached = false
 
           let tokenPrice = 0
@@ -328,7 +328,7 @@ export function quoteRouter({
           }
           const quoteOut = await dataSource.getRepository(Quote).create(quote)
           await dataSource.getRepository(Quote).save(quoteOut)
-          quote.quote.quoteId = quoteIn.id
+          quote.quote.quoteId = quoteOut.id
 
           // return get quote/in response
           return _res.send({
