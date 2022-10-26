@@ -283,7 +283,7 @@ export function quoteRouter({
               ? cryptoAmount
               : _req.body.cryptoAmount,
             guaranteedUntil: guaranteedUntil,
-            quoteId: quote.id,
+            quoteId: ' ',
             transferType: TransferType.TransferIn,
           }
           quote.kyc = {
@@ -328,9 +328,16 @@ export function quoteRouter({
           }
           const quoteOut = await dataSource.getRepository(Quote).create(quote)
           await dataSource.getRepository(Quote).save(quoteOut)
-          console.log('quote.id', quoteOut.id)
+          quote.quote.quoteId = quoteIn.id
 
-          return _res.send({ ...quote })
+          // return get quote/in response
+          return _res.send({
+            quote: {
+              ...quote.quote,
+            },
+            kyc: { ...quote.kyc },
+            fiatAccount: { ...quote.fiatAccount },
+          })
         } catch (error: any) {
           switch (error.message) {
             case FiatConnectError.CryptoNotSupported:
