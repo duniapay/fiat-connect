@@ -177,8 +177,7 @@ export function transferRouter({
             res.status(409).send({ error: FiatConnectError.ResourceExists })
           }
         } else {
-          console.log('Unprocessable Entity'),
-
+          console.log('Unprocessable Entity')
           return res.status(422).send('Unprocessable Entity')
         }
       },
