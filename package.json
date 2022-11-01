@@ -42,7 +42,9 @@
     "express": "^4.17.2",
     "express-idempotency": "^1.0.5",
     "express-session": "^1.17.3",
+    "express-winston": "^4.2.0",
     "pg": "^8.4.0",
+    "pm2": "^5.2.0",
     "prettier": "^2.7.1",
     "redis": "^4.2.0",
     "reflect-metadata": "^0.1.13",
@@ -50,8 +52,8 @@
     "siwe": "^1.1.6",
     "typeorm": "0.3.7",
     "typescript": "^4.7.4",
-    "pm2": "^5.2.0",
     "uuid": "^8.3.2",
+    "winston": "^3.8.2",
     "yargs": "^17.5.1"
   },
   "devDependencies": {
