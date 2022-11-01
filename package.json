@@ -4,6 +4,7 @@
   "description": "DUNIA PAYMENT implementation of FiatConnect API",
   "main": "index.js",
   "scripts": {
+    "preinstall": "npm i -g pm2 && pm2 install pm2-logrotate",
     "prebuild": "rimraf dist",
     "build": "tsc",
     "format": "prettier --loglevel error --write \"./src/**/*.ts\"",
