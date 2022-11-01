@@ -170,8 +170,7 @@ export function accountsRouter({
             fiatAccountId: account.id,
             fiatAccountSchema: account.fiatAccountSchema,
             accountName: account.accountName,
-            institutionName: account.institutionName,
-            accountNumber: account.accountNumber,
+            institutionName: account.institutionName
           }
           formattedBankAccounts.push(add)
         })
