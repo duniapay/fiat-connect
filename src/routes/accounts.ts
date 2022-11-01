@@ -126,8 +126,7 @@ export function accountsRouter({
             accountName: entity.accountName,
             institutionName: entity.institutionName,
             fiatAccountType: entity.fiatAccountType,
-            fiatAccountSchema: req.body.fiatAccountSchema,
-            accountNumber: entity.accountNumber
+            fiatAccountSchema: req.body.fiatAccountSchema
           })
         } catch (error) {
           return _res
