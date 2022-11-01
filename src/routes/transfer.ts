@@ -235,6 +235,7 @@ export function transferRouter({
             if (Date.now() > isValidUntil.getTime()) {
               entity.status = TransferStatus.TransferFailed
             }
+            entity.status = TransferStatus.TransferStarted
             let fee = 0
 
             if (account.fiatAccountType === FiatAccountType.MobileMoney) {
