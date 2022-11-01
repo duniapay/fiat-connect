@@ -90,7 +90,7 @@ export function kycRouter({
             },
           }
           const webhookSecret = process.env.WEBHOOK_SECRET!
-          await notifyPartner(d, webhookSecret)
+          //await notifyPartner(d, webhookSecret)
           return _res.send({ kycStatus: KycStatus.KycPending })
         } catch (error) {
           return _res
