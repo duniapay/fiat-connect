@@ -165,7 +165,7 @@ export function transferRouter({
               }
             const webhookSecret = process.env.WEBHOOK_SECRET!
 
-            await notifyPartner(d, webhookSecret)
+            //await notifyPartner(d, webhookSecret)
             return res.status(200).send({
               transferId: entity.id,
               transferStatus: entity.status,
@@ -274,7 +274,7 @@ export function transferRouter({
               }
             const webhookSecret = process.env.WEBHOOK_SECRET!
 
-            await notifyPartner(d, webhookSecret)
+            // await notifyPartner(d, webhookSecret)
             return res.status(200).send({
               transferId: entity.id,
               transferStatus: entity.status,

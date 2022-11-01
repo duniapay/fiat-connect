@@ -19,7 +19,7 @@ export const AppDataSource = new DataSource({
   synchronize: false,
   dropSchema: false,
   logging: false,
-  entities: ['build/src/entity/*.js'],
+  entities: ['./build/src/entity/*.js'],
   migrations: [],
   subscribers: [],
   ssl: true,
