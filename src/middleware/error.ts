@@ -23,7 +23,6 @@ export const errorToStatusCode = (
     res.status(401).json({
       error: error.fiatConnectError,
     })
-    console.log(error)
   } else {
     next(error)
   }

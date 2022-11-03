@@ -126,8 +126,7 @@ export function accountsRouter({
             accountName: entity.accountName,
             institutionName: entity.institutionName,
             fiatAccountType: entity.fiatAccountType,
-            fiatAccountSchema: req.body.fiatAccountSchema,
-            accountNumber: entity.accountNumber,
+            fiatAccountSchema: req.body.fiatAccountSchema
           })
         } catch (error) {
           return _res
@@ -171,8 +170,7 @@ export function accountsRouter({
             fiatAccountId: account.id,
             fiatAccountSchema: account.fiatAccountSchema,
             accountName: account.accountName,
-            institutionName: account.institutionName,
-            accountNumber: account.accountNumber,
+            institutionName: account.institutionName
           }
           formattedBankAccounts.push(add)
         })
