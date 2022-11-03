@@ -201,23 +201,12 @@ export function transferRouter({
       ) => {
         const idempotencyKey = req.headers['idempotency-key']?.toString()
 
-        if (!idempotencyKey) {
-          const transfer = await repository.findOneBy({
-            fiatAccountId: req.body.fiatAccountId,
-            quoteId: req.body.quoteId,
-          })
-          const formatedTransferResponse = {
-            ...transfer,
-            transferId: transfer.id,
-            id: undefined,
-          }
-          return res.send(formatedTransferResponse)
+        let isKeyValid
+        if (idempotencyKey) {
+          isKeyValid = await validateIdempotencyKey(idempotencyKey, client)
         }
-
-        const isValid = await validateIdempotencyKey(idempotencyKey, client)
-
         // Check if the idempotency key is already in the cache
-        if (isValid) {
+        if (idempotencyKey && isKeyValid) {
           try {
             // Load the corresponding privateKey
 
@@ -303,6 +292,17 @@ export function transferRouter({
           } catch (error: any) {
             res.status(409).send({ error: FiatConnectError.ResourceExists })
           }
+        } else {
+          const transfer = await repository.findOneBy({
+            fiatAccountId: req.body.fiatAccountId,
+            quoteId: req.body.quoteId,
+          })
+          const formatedTransferResponse = {
+            ...transfer,
+            transferId: transfer.id,
+            id: undefined,
+          }
+          return res.send(formatedTransferResponse)
         }
       },
     ),
