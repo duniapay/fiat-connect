@@ -4,7 +4,7 @@
   "description": "DUNIA PAYMENT implementation of FiatConnect API",
   "main": "index.js",
   "engines": {
-    "node": "16.x"
+    "node": "16.13.1"
   },
   "scripts": {
     "preinstall": "npm i -g pm2 && pm2 install pm2-logrotate",
