@@ -180,7 +180,12 @@ export function transferRouter({
             fiatAccountId: req.body.fiatAccountId,
             quoteId: req.body.quoteId,
           })
-          return res.send(transfer)
+          const formatedTransferResponse = {
+            ...transfer,
+            transferId: transfer.id,
+            id: undefined,
+          }
+          return res.send(formatedTransferResponse)
         }
       },
     ),
@@ -201,7 +206,12 @@ export function transferRouter({
             fiatAccountId: req.body.fiatAccountId,
             quoteId: req.body.quoteId,
           })
-          return res.send(transfer)
+          const formatedTransferResponse = {
+            ...transfer,
+            transferId: transfer.id,
+            id: undefined,
+          }
+          return res.send(formatedTransferResponse)
         }
 
         const isValid = await validateIdempotencyKey(idempotencyKey, client)
