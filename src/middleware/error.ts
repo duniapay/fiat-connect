@@ -11,8 +11,6 @@ export const errorToStatusCode = (
   res: express.Response,
   next: express.NextFunction,
 ) => {
-      console.log(error)
-
   if (error instanceof ValidationError) {
     res.status(400).json({
       error: error.message,
@@ -25,7 +23,6 @@ export const errorToStatusCode = (
     res.status(401).json({
       error: error.fiatConnectError,
     })
-    
   } else {
     next(error)
   }

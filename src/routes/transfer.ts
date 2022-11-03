@@ -173,12 +173,14 @@ export function transferRouter({
               transferAddress: entity.transferAddress,
             })
           } catch (error: any) {
-            console.log(error)
             res.status(409).send({ error: FiatConnectError.ResourceExists })
           }
         } else {
-          console.log('Unprocessable Entity')
-          return res.status(422).send('Unprocessable Entity')
+          const transfer = await repository.findOneBy({
+            fiatAccountId: req.body.fiatAccountId,
+            quoteId: req.body.quoteId,
+          })
+          return res.send(transfer)
         }
       },
     ),
@@ -195,7 +197,11 @@ export function transferRouter({
         const idempotencyKey = req.headers['idempotency-key']?.toString()
 
         if (!idempotencyKey) {
-          return res.status(422).send('Unprocessable Entity')
+          const transfer = await repository.findOneBy({
+            fiatAccountId: req.body.fiatAccountId,
+            quoteId: req.body.quoteId,
+          })
+          return res.send(transfer)
         }
 
         const isValid = await validateIdempotencyKey(idempotencyKey, client)
@@ -237,6 +243,7 @@ export function transferRouter({
               entity.status = TransferStatus.TransferFailed
             }
             entity.status = TransferStatus.TransferStarted
+
             let fee = 0
 
             if (account.fiatAccountType === FiatAccountType.MobileMoney) {
@@ -284,7 +291,6 @@ export function transferRouter({
               transferAddress: entity.transferAddress,
             })
           } catch (error: any) {
-            console.log(error)
             res.status(409).send({ error: FiatConnectError.ResourceExists })
           }
         }

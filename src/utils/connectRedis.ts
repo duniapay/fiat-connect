@@ -10,16 +10,18 @@ const REDIS_HOST =
     ? 'redis://localhost:6379'
     : process.env.REDISCLOUD_URL
 
-const redisClient = createClient({
-  url: REDIS_HOST,
-})
+let redisClient: any
 
 const connectRedis = async () => {
   try {
+    redisClient = createClient({
+      url: REDIS_HOST,
+    })
+    // check if redis socket is opened
     // eslint-disable-next-line no-console
-    redisClient.on('error', (error) => console.error(`Error : ${error}`))
+    redisClient.on('error', (error: any) => console.error(`Error : ${error}`))
     // eslint-disable-next-line no-console
-    await redisClient.connect().catch((error) => {
+    await redisClient.connect().catch((error: any) => {
       console.log(error)
     })
     // eslint-disable-next-line no-console
