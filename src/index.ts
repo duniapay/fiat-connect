@@ -10,7 +10,8 @@ async function main() {
   const clientAuthMiddleware = getClientAuthMiddleware(authConfig)
 
   const client = redisClient
-
+  // print node_env variable to the console
+  console.log('NODE_ENV: ' + process.env.NODE_ENV)
   await connectRedis()
 
   const app = initApp({
