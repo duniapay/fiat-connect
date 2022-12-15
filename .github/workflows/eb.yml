@@ -1,9 +1,11 @@
 name: Deploy
 on:
   pull_request:
+    types:
+      - opened
     branches:
-    - develop
-
+      - 'develop'
+    
 jobs:
   build:
     runs-on: ubuntu-latest
