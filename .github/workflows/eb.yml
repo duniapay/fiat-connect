@@ -24,6 +24,6 @@ jobs:
         aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         application_name: Fiatconnect
         environment_name: Fiatconnect-env
-        version_label: 12345
+        version_label: v${{ github.run_id }}-${{ github.run_attempt }}
         region: eu-west-3
         deployment_package: deploy.zip
