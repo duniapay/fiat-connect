@@ -5,8 +5,8 @@ import * as dotenv from 'dotenv'
 dotenv.config()
 
 const DATABASE_PORT =
-  process.env.DATABASE_PORT !== undefined
-    ? parseInt(process.env.DATABASE_PORT, 10)
+  process.env.RDS_PORT !== undefined
+    ? parseInt(process.env.RDS_PORT, 10)
     : 5432
 
 export const AppDataSource = new DataSource({
@@ -14,20 +14,17 @@ export const AppDataSource = new DataSource({
   host:
     process.env.NODE_ENV === 'localhost'
       ? 'localhost'
-      : process.env.DATABASE_HOST,
-  port: DATABASE_PORT,
+      : process.env.RDS_HOSTNAME,
+  port: process.env.RDS_PORT,
   username:
     process.env.NODE_ENV === 'localhost'
       ? 'postgres'
-      : process.env.DATABASE_USER,
+      : process.env.RDS_USERNAME,
   password:
     process.env.NODE_ENV === 'localhost'
       ? 'admin'
-      : process.env.DATABASE_PASSWORD,
-  database:
-    process.env.NODE_ENV === 'localhost'
-      ? 'postgres'
-      : process.env.DATABASE_NAME,
+      : process.env.RDS_PASSWORD,
+  database: 'postgres',
   synchronize: false,
   dropSchema: false,
   logging: false,
