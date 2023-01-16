@@ -7,13 +7,13 @@
     "node": "16.x"
   },
   "scripts": {
-    "preinstall": "npm i -g pm2 && pm2 install pm2-logrotate",
     "prebuild": "rimraf dist",
     "build": "tsc",
+    "deploy": "npm run build && npm run start",
     "format": "prettier --loglevel error --write \"./src/**/*.ts\"",
     "lint": "eslint --ext=.tsx,.ts --fix src/",
     "dev": "./scripts/dev.sh",
-    "start": "node ./build/src/index.js --auth-config-option alfajores --session-secret poiii",
+    "start": "NODE_ENV=production node ./build/src/index.js",
     "test": "jest --config=jest.config.js",
     "test:e2e": "jest --config=jest-e2e.config.js",
     "dev:server": "NODE_ENV=localhost nodemon  -r dotenv/config --watch './**/*.ts' --exec 'ts-node' --files ./src/index.ts --auth-config-option alfajores --session-secret poiii",
