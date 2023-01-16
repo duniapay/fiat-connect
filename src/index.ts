@@ -1,7 +1,7 @@
 import { loadConfig } from './config'
 import { getClientAuthMiddleware } from './middleware/authenticate'
 import { initApp } from './app'
-import { AppDataSource } from './utils/data-source'
+import { AppDataSource, DevDataSource } from './utils/data-source'
 import { redisClient, connectRedis } from './utils/connectRedis'
 
 async function main() {
@@ -11,6 +11,7 @@ async function main() {
 
   const client = redisClient
   // print node_env variable to the console
+  // eslint-disable-next-line no-console
   console.log('NODE_ENV: ' + process.env.NODE_ENV)
   await connectRedis()
 
@@ -21,13 +22,33 @@ async function main() {
     client,
   })
 
-  AppDataSource.initialize()
-    .then(async () => {
-      // start express server
-      await app.listen(port, '0.0.0.0')
+  if (process.env.NODE_ENV === 'development') {
+    console.log('loading ' + process.env.NODE_ENV + ' environment')
+
+    DevDataSource.initialize()
+      .then(async () => {
+        // start express server
+        app.listen(port, '0.0.0.0')
+        // eslint-disable-next-line no-console
+      })
       // eslint-disable-next-line no-console
-    })
-    .catch((error) => console.log(error))
+      .catch((error) => {
+        console.error(error)
+      })
+  } else {
+    console.log(
+      'loading ' + process.env.NODE_ENV + ' environment at port ' + port + '',
+    )
+
+    AppDataSource.initialize()
+      .then(async () => {
+        // start express server
+        app.listen(port, '0.0.0.0')
+        // eslint-disable-next-line no-console
+      })
+      // eslint-disable-next-line no-console
+      .catch((error) => console.log(error))
+  }
 }
 
 main()
